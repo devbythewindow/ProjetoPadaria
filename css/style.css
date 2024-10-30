@@ -1,3 +1,137 @@
-body{
+/* Vou começar com um 'reset' básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+/* vejam se essa folha de estilo está bonita. Aguardo comentário de vocês */
+body {
     background-color: lightgray;
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Estilo do cabeçalho */
+.header {
+    background-color: #6d4c41; /* Cor de fundo marrom */
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 1.2em;
+}
+
+/* Estilo do container */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+/* Estilo do menu de navegação */
+.itens {
+    background-color: #c8ad97; /* Cor de fundo mais clara */
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.itens ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+}
+
+.itens li {
+    margin: 0 15px;
+}
+
+.itens a {
+    text-decoration: none;
+    color: #6d4c41; /* Cor do texto */
+    font-weight: bold;
+}
+
+.itens a:hover {
+    color: #3e2723; /* Cor mais escura ao passar o mouse */
+}
+
+/* Estilo das seções de produtos */
+section {
+    margin: 20px 0;
+}
+
+.product {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 10px 0;
+    transition: transform 0.2s;
+}
+
+.product:hover {
+    transform: scale(1.05); /* Efeito de zoom ao passar o mouse */
+}
+
+.product h2 {
+    font-size: 1.5em;
+    color: #6d4c41; /* Cor do texto */
+}
+
+.product p {
+    font-size: 1.2em;
+    color: #666;
+}
+
+/* Estilo do formulário */
+footer {
+    text-align: center;
+    background-color: #6d4c41;
+    color: white;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+footer p {
+    margin: 0;
+}
+
+/* Estilo da seção de cadastro */
+footer section {
+    margin: 20px 0;
+}
+
+footer h2 {
+    margin-bottom: 10px;
+}
+
+footer input {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: calc(50% - 22px); /* Para ajustar o tamanho */
+}
+
+footer button {
+    padding: 10px 20px;
+    background-color: #6d4c41;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+footer button:hover {
+    background-color: #3e2723; /* Cor mais escura ao passar o mouse */
 }
