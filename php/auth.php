@@ -12,12 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Verifica se as credenciais estão corretas
     if ($username === $admin_username && $password === $admin_password) {
-        // Se as credenciais estiverem corretas, define a variável de sessão
         $_SESSION['admin_logged_in'] = true;
         header('Location: admin.php'); // Redireciona para a página admin
         exit();
     } else {
-        echo 'Usuário ou senha inválidos.';
+        $error_message = 'Usuário ou senha inválidos.';
     }
 }
 
@@ -45,11 +44,15 @@ if (!$isAdmin) {
                 border-radius: 5px; 
                 cursor: pointer; 
             }
+            .error { color: red; }
         </style>
     </head>
     <body>
         <div class="container">
             <h2>Login Admin</h2>
+            <?php if (isset($error_message)): ?>
+                <p class="error"><?php echo htmlspecialchars($error_message); ?></p>
+            <?php endif; ?>
             <form method="POST" action="">
                 <div>
                     <label for="username">Usuário:</label>
@@ -63,7 +66,7 @@ if (!$isAdmin) {
             </form>
 
             <div class="button-container">
-                <a href="index.html" style="text-decoration: none;">
+                <a href="../index.php" style="text-decoration: none;">
                     <button>Voltar para o Início</button>
                 </a>
             </div>
