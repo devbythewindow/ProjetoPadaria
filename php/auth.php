@@ -1,30 +1,30 @@
 <?php 
 session_start();
 
-// Defina as credenciais do administrador
+// credenciais admninistrador
 $admin_username = 'admin';
-$admin_password = 'senha123'; // Substitua por uma senha segura
+$admin_password = 'senha123';
 
-// Verifica se o formulário foi enviado
+// Envio formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Verifica se as credenciais estão corretas
+    // credenciais corretas?
     if ($username === $admin_username && $password === $admin_password) {
         $_SESSION['admin_logged_in'] = true;
-        header('Location: admin.php'); // Redireciona para a página admin
+        header('Location: admin.php');
         exit();
     } else {
         $error_message = 'Usuário ou senha inválidos.';
     }
 }
 
-// Verifica se o usuário é o admin
+// usuário admin?
 $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 
 if (!$isAdmin) {
-    // Se não for admin, exibe o formulário de login
+    // não  admin, exibe o formulário de login
     ?>
     <!DOCTYPE html>
     <html lang="pt-BR">

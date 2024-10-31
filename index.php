@@ -37,7 +37,7 @@
 
         <h2>Menu</h2>
         <div id="product-list">
-            <!-- Produtos serão adicionados aqui -->
+            <!-- Produtos adicionados no servidor -->
         </div>
 
         <h2>Carrinho</h2>

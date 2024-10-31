@@ -1,33 +1,31 @@
 <?php 
 session_start();
 
-// Adiciona cabeçalhos para evitar cache
+//Cabeçalhos para cache
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-// Verifica se o usuário já está autenticado
+// Autenticação usuaío
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
     header('Location: admin.php'); // Redireciona para a página admin
     exit();
 }
 
-// Defina as credenciais do administrador
+// Autenticação administrador
 $admin_username = 'admin';
-$admin_password = 'senha123'; // Substitua por uma senha segura
+$admin_password = 'senha123';
 
-// Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Verifica se as credenciais estão corretas
-    if ($username === $admin_username && $password === $admin_password) {
-        // Se as credenciais estiverem corretas, define a variável de sessão
-        $_SESSION['admin_logged_in'] = true;
-        header('Location: admin.php'); // Redireciona para a página admin
-        exit();
-    } else {
+if ($username === $admin_username && $password === $admin_password) {
+    
+    $_SESSION['admin_logged_in'] = true;
+    header('Location: admin.php');
+    exit();
+} else {
         $error_message = 'Usuário ou senha inválidos.';
     }
 }
