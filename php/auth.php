@@ -63,7 +63,7 @@ if (!$isAdmin) {
             </form>
 
             <div class="button-container">
-                <a href="../index.php" style="text-decoration: none;">
+                <a href="index.html" style="text-decoration: none;">
                     <button>Voltar para o Início</button>
                 </a>
             </div>

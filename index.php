@@ -9,11 +9,31 @@
         .container { width: 80%; margin: 0 auto; }
         .product { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; }
         .cart { margin-top: 20px; }
+        .admin-button { 
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+        }
+        .admin-button button {
+            background-color: blue; 
+            color: white; 
+            padding: 10px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Café dos Alunos</h1>
+
+        <!-- Botão Admin -->
+        <div class="admin-button">
+            <a href="php/login.php" style="text-decoration: none;">
+                <button>Admin</button>
+            </a>
+        </div>
 
         <h2>Menu</h2>
         <div id="product-list">
@@ -27,33 +47,33 @@
             <button onclick="checkout()">Finalizar Compra</button>
         </div>
 
-    <?php
-        // Conexão com o banco de dados
-        require 'php/conexao.php';
+        <?php
+            // Conexão com o banco de dados
+            require 'php/conexao.php';
 
-        // Consulta para obter todos os produtos
-        $sql = "SELECT id, nome, preco, descricao FROM produtos";
-        $result = $conn->query($sql);
+            // Consulta para obter todos os produtos
+            $sql = "SELECT id, nome, preco, descricao FROM produtos";
+            $result = $conn->query($sql);
 
-        // Array para armazenar os produtos para uso no JavaScript
-        $produtos_js = [];
+            // Array para armazenar os produtos para uso no JavaScript
+            $produtos_js = [];
 
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                // Adiciona o produto ao array de produtos
-                $produtos_js[] = [
-                    "id" => $row["id"],
-                    "nome" => $row["nome"],
-                    "preco" => $row["preco"],
-                    "descricao" => $row["descricao"]
-                ];
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    // Adiciona o produto ao array de produtos
+                    $produtos_js[] = [
+                        "id" => $row["id"],
+                        "nome" => $row["nome"],
+                        "preco" => $row["preco"],
+                        "descricao" => $row["descricao"]
+                    ];
+                }
+            } else {
+                echo "<p>Nenhum produto encontrado</p>";
             }
-        } else {
-            echo "<p>Nenhum produto encontrado</p>";
-        }
 
-        $conn->close();
-    ?>
+            $conn->close();
+        ?>
 
     </div>
 
