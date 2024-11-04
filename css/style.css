@@ -1,137 +1,130 @@
-/* Vou começar com um 'reset' básico */
-* {
+/* Geral */
+body, html {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
-/* vejam se essa folha de estilo está bonita. Aguardo comentário de vocês */
-body {
-    background-color: lightgray;
-    font-family: 'Arial', sans-serif;
-    line-height: 1.6;
-    background-color: #f9f9f9;
-    color: #333;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
 }
 
-/* Estilo do cabeçalho */
-.header {
-    background-color: #6d4c41; /* Cor de fundo marrom */
-    color: white;
-    padding: 20px;
-    text-align: center;
-}
-
-.header h1 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
-}
-
-.header p {
-    font-size: 1.2em;
-}
-
-/* Estilo do container */
 .container {
     max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 20px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-/* Estilo do menu de navegação */
-.itens {
-    background-color: #c8ad97; /* Cor de fundo mais clara */
-    padding: 15px;
-    border-radius: 5px;
+/* Separador entre categorias */
+.divider {
+    border: 0;
+    height: 2px;
+    background: #f1c40f;
+    margin: 30px 0;
 }
 
-.itens ul {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-}
-
-.itens li {
-    margin: 0 15px;
-}
-
-.itens a {
-    text-decoration: none;
-    color: #6d4c41; /* Cor do texto */
-    font-weight: bold;
-}
-
-.itens a:hover {
-    color: #3e2723; /* Cor mais escura ao passar o mouse */
-}
-
-/* Estilo das seções de produtos */
-section {
+/* Ajustes para Swiper Containers */
+.swiper-container {
     margin: 20px 0;
 }
 
+/* Ajuste de Espaçamento e Estilo dos Produtos */
 .product {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    min-width: 200px;
+    background-color: #3c3c3c;
     padding: 15px;
-    margin: 10px 0;
-    transition: transform 0.2s;
-}
-
-.product:hover {
-    transform: scale(1.05); /* Efeito de zoom ao passar o mouse */
-}
-
-.product h2 {
-    font-size: 1.5em;
-    color: #6d4c41; /* Cor do texto */
-}
-
-.product p {
-    font-size: 1.2em;
-    color: #666;
-}
-
-/* Estilo do formulário */
-footer {
+    border-radius: 8px;
+    border: 1px solid #ddd;
     text-align: center;
-    background-color: #6d4c41;
-    color: white;
-    padding: 20px;
+    color: #fff;
+}
+
+/* Estilo do Título e Subtítulos */
+h1, h2, h3 {
+    color: #f1c40f;
+    margin-top: 0;
+    text-align: center;
+}
+
+/* Estilo do Botão */
+button {
+    background-color: #f39c12;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e67e22;
+}
+
+/* Estilo do botão Admin */
+.admin-button {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+/* Carrinho de compras */
+.cart {
+    background-color: #3c3c3c;
+    color: #fff;
+    padding: 15px;
+    border-radius: 8px;
     margin-top: 20px;
 }
 
-footer p {
-    margin: 0;
+/* Responsividade */
+@media (max-width: 1024px) {
+    .swiper-container {
+        width: 100%;
+    }
+
+    .product {
+        min-width: 150px;
+        padding: 10px;
+    }
 }
 
-/* Estilo da seção de cadastro */
-footer section {
-    margin: 20px 0;
+@media (max-width: 768px) {
+    h1, h2, h3 {
+        font-size: 1.5em;
+    }
+
+    .admin-button {
+        justify-content: center;
+    }
+
+    .product {
+        min-width: 100%;
+        padding: 10px;
+    }
+
+    .cart button {
+        width: 100%;
+    }
 }
 
-footer h2 {
-    margin-bottom: 10px;
-}
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
 
-footer input {
-    padding: 10px;
-    margin: 5px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    width: calc(50% - 22px); /* Para ajustar o tamanho */
-}
+    h1 {
+        font-size: 1.8em;
+    }
 
-footer button {
-    padding: 10px 20px;
-    background-color: #6d4c41;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
+    h2, h3 {
+        font-size: 1.4em;
+    }
 
-footer button:hover {
-    background-color: #3e2723; /* Cor mais escura ao passar o mouse */
+    .product {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    button {
+        width: 100%;
+        padding: 8px;
+    }
 }

@@ -1,0 +1,77 @@
+body {
+    background-color: #2c2c2c; /* Fundo cinza escuro */
+    color: #ffffff; /* Texto branco */
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+h1, h2 {
+    margin: 20px 0;
+    color: #f1c40f; /* Títulos em amarelo */
+}
+
+.container {
+    width: 80%;
+    max-width: 800px; /* Largura máxima */
+    margin: 0 auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #3c3c3c; /* Fundo da tabela */
+}
+
+table, th, td {
+    border: 1px solid #7f8c8d; /* Borda cinza */
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #7f8c8d; /* Fundo das células do cabeçalho */
+    color: #ffffff; /* Texto branco no cabeçalho */
+}
+
+input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #7f8c8d; /* Fundo cinza claro */
+    color: #ffffff; /* Texto branco */
+    border: 1px solid #ddd; /* Borda clara */
+    border-radius: 4px; /* Bordas arredondadas */
+    box-sizing: border-box; /* Para garantir que o padding não afete a largura total */
+}
+
+textarea {
+    height: 100px; /* Aumenta a altura da caixa de descrição */
+}
+
+.input-edicao {
+    background-color: #f39c12; /* Fundo laranja */
+    border: 1px solid #e67e22; /* Borda laranja mais escura */
+    color: #ffffff; /* Texto branco */
+}
+
+button {
+    background-color: #f39c12; /* Botão laranja */
+    color: #ffffff; /* Texto branco */
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Transição suave para o hover */
+}
+
+button:hover {
+    background-color: #e67e22; /* Laranja mais escuro ao passar o mouse */
+}

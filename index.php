@@ -4,25 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Café dos Alunos</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .container { width: 80%; margin: 0 auto; }
-        .product { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; }
-        .cart { margin-top: 20px; }
-        .admin-button { 
-            position: absolute; 
-            top: 20px; 
-            right: 20px; 
-        }
-        .admin-button button {
-            background-color: blue; 
-            color: white; 
-            padding: 10px; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
 </head>
 <body>
     <div class="container">
@@ -36,9 +19,49 @@
         </div>
 
         <h2>Menu</h2>
-        <div id="product-list">
-            <!-- Produtos adicionados no servidor -->
-        </div>
+
+        <?php
+        require 'php/conexao.php';
+
+        function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
+            echo "<h3>$categoria</h3>";
+            echo '<div class="swiper-container" id="'.$carouselId.'">';
+            echo '<div class="swiper-wrapper">';
+        
+            $sql = "SELECT id, nome, preco, descricao FROM produtos WHERE categoria = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $categoria);
+            $stmt->execute();
+            $result = $stmt->get_result();
+        
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo '<div class="swiper-slide">';
+                    echo '<div class="product">';
+                    echo '<h4>' . htmlspecialchars($row["nome"]) . '</h4>';
+                    echo '<p>Descrição: ' . htmlspecialchars($row["descricao"]) . '</p>';
+                    echo '<p>Preço: R$ ' . number_format($row["preco"], 2, ',', '.') . '</p>';
+                    echo '<button onclick="adicionarAoCarrinho(' . $row["id"] . ')">Adicionar ao Carrinho</button>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+            } else {
+                echo "<p>Nenhum produto encontrado nesta categoria.</p>";
+            }
+        
+            echo '</div>';
+            echo '<div class="swiper-button-next"></div>';
+            echo '<div class="swiper-button-prev"></div>';
+            echo '</div>';
+            echo '<hr class="divider">';
+        }
+
+        exibirProdutosPorCategoria("Massas e Pães", $conn, "carousel-massas-paes");
+        exibirProdutosPorCategoria("Salgados", $conn, "carousel-salgados");
+        exibirProdutosPorCategoria("Doces e Bolos", $conn, "carousel-doces-bolos");
+
+        $conn->close();
+        ?>
 
         <h2>Carrinho</h2>
         <div class="cart">
@@ -46,89 +69,57 @@
             <p id="total-price">Total: R$ 0,00</p>
             <button onclick="checkout()">Finalizar Compra</button>
         </div>
-
-        <?php
-            // Conexão com o banco de dados
-            require 'php/conexao.php';
-
-            // Consulta para obter todos os produtos
-            $sql = "SELECT id, nome, preco, descricao FROM produtos";
-            $result = $conn->query($sql);
-
-            // Array para armazenar os produtos para uso no JavaScript
-            $produtos_js = [];
-
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    // Adiciona o produto ao array de produtos
-                    $produtos_js[] = [
-                        "id" => $row["id"],
-                        "nome" => $row["nome"],
-                        "preco" => $row["preco"],
-                        "descricao" => $row["descricao"]
-                    ];
-                }
-            } else {
-                echo "<p>Nenhum produto encontrado</p>";
-            }
-
-            $conn->close();
-        ?>
-
     </div>
 
+    <!-- Scripts -->
+    <script src="js/carrinho.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
-        // Recebendo os produtos do PHP para o JavaScript
-        const produtos = <?php echo json_encode($produtos_js); ?>;
-
-        const carrinho = [];
-
-        // Exibir produtos no menu
-        const listaProdutos = document.getElementById('product-list');
-        produtos.forEach((produto, index) => {
-            const produtoDiv = document.createElement('div');
-            produtoDiv.classList.add('product');
-            produtoDiv.innerHTML = `
-                <h3>${produto.nome}</h3>
-                <p>Preço: R$ ${parseFloat(produto.preco).toFixed(2)}</p>
-                <p>Descrição: ${produto.descricao}</p>
-                <button onclick="adicionarAoCarrinho(${index})">Adicionar ao Carrinho</button>
-            `;
-            listaProdutos.appendChild(produtoDiv);
-        });
-
-        // Função para adicionar produto ao carrinho
-        function adicionarAoCarrinho(index) {
-            carrinho.push(produtos[index]);
-            atualizarCarrinho();
+    document.addEventListener('DOMContentLoaded', function () {
+    const swiperMassas = new Swiper('#carousel-massas-paes', {
+        slidesPerView: 3,
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '#carousel-massas-paes .swiper-button-next',
+            prevEl: '#carousel-massas-paes .swiper-button-prev'
+        },
+        breakpoints: {
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 }
         }
+    });
 
-        // Função para atualizar o carrinho
-        function atualizarCarrinho() {
-            const listaCarrinho = document.getElementById('cart-items');
-            listaCarrinho.innerHTML = '';
-            let total = 0;
-            carrinho.forEach((item, index) => {
-                const itemLi = document.createElement('li');
-                itemLi.innerHTML = `${item.nome} - R$ ${parseFloat(item.preco).toFixed(2)} <button onclick="removerDoCarrinho(${index})">Remover</button>`;
-                listaCarrinho.appendChild(itemLi);
-                total += parseFloat(item.preco);
-            });
-            document.getElementById('total-price').textContent = `Total: R$ ${total.toFixed(2)}`;
+    const swiperSalgados = new Swiper('#carousel-salgados', {
+        slidesPerView: 3,
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '#carousel-salgados .swiper-button-next',
+            prevEl: '#carousel-salgados .swiper-button-prev'
+        },
+        breakpoints: {
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 }
         }
+    });
 
-        // Função para remover produto do carrinho
-        function removerDoCarrinho(index) {
-            carrinho.splice(index, 1);
-            atualizarCarrinho();
-        }
 
-        // Função para finalizar a compra
-        function checkout() {
-            alert(`Total da compra: R$ ${carrinho.reduce((total, item) => total + parseFloat(item.preco), 0).toFixed(2)}`);
-            carrinho.length = 0;
-            atualizarCarrinho();
+    const swiperDoces = new Swiper('#carousel-doces-bolos', {
+        slidesPerView: 3,
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '#carousel-doces-bolos .swiper-button-next',
+            prevEl: '#carousel-doces-bolos .swiper-button-prev'
+        },
+        breakpoints: {
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 }
         }
-    </script>
+    });
+});
+</script>
+<script>
+
+    const produtos = <?php echo json_encode($produtos); ?>;
+</script>
 </body>
 </html>
