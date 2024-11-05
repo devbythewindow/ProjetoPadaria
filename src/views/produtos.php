@@ -1,27 +1,65 @@
+<?php
+session_start();
+$conn = mysqli_connect("localhost", "root", "", "projetopadaria");
+
+$sql = "SELECT id, nome, preco, descricao FROM produto";
+$result = $conn->query($sql);
+
+$data = array();
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+}
+
+echo json_encode($data);
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Café dos Alunos</title>
-    <link rel="stylesheet" href="public/css/style.css">
-    <link rel="stylesheet" href="public/css/admin.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
 </head>
 <body>
     <div class="container">
         <h1>Café dos Alunos</h1>
 
-        <!-- Botão Admin -->
-        <!-- Botão Admin - Versão alternativa -->
+        <!-- Botão -->
         <div class="admin-button">
-        <button onclick="window.location.href='php/login.php'">Admin</button>
+            <a href="php/login.php" style="text-decoration: none;">
+                <button>Admin</button>
+            </a>
         </div>
 
         <h2>Menu</h2>
 
         <?php
         require 'php/conexao.php';
+
+        class ProdutosController {
+            private $conn;
+            
+            public function __construct($conn) {
+                $this->conn = $conn;
+            }
+            
+            public function getProdutos() {
+                $stmt = $this->conn->prepare("SELECT id, nome, preco, descricao, categoria FROM produtos");
+                $stmt->execute();
+                return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            }
+        }
+        
+        // Uso
+        $produtosController = new ProdutosController($conn);
+        $produtos = $produtosController->getProdutos();
+        header('Content-Type: application/json');
+        echo json_encode($produtos);
 
         function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
             echo "<h3>$categoria</h3>";
@@ -72,11 +110,11 @@
     </div>
 
     <!-- Scripts -->
-    <script src="public/js/carrinho.js"></script>
+    <script src="js/carrinho.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        const swiperMassas = new Swiper('#carousel-massas-paes', {
+    document.addEventListener('DOMContentLoaded', function () {
+    const swiperMassas = new Swiper('#carousel-massas-paes', {
         slidesPerView: 3,
         spaceBetween: 20,
         navigation: {
@@ -84,12 +122,8 @@
             prevEl: '#carousel-massas-paes .swiper-button-prev'
         },
         breakpoints: {
-            768: { 
-                slidesPerView: 2 
-            },
-            1024: {
-                 slidesPerView: 3 
-                }
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 }
         }
     });
 
@@ -122,7 +156,6 @@
 });
 </script>
 <script>
-
     const produtos = <?php echo json_encode($produtos); ?>;
 </script>
 </body>

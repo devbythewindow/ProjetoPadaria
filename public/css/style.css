@@ -5,6 +5,7 @@ body, html {
     box-sizing: border-box;
     font-family: Arial, sans-serif;
     overflow-x: hidden;
+    background-color: #2c2c2c;
 }
 
 .container {
@@ -13,7 +14,6 @@ body, html {
     padding: 20px;
 }
 
-/* Separador entre categorias */
 .divider {
     border: 0;
     height: 2px;
@@ -21,23 +21,78 @@ body, html {
     margin: 30px 0;
 }
 
-/* Ajustes para Swiper Containers */
 .swiper-container {
     margin: 20px 0;
+    width: 100%;
 }
 
-/* Ajuste de Espaçamento e Estilo dos Produtos */
+.swiper-slide{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 .product {
-    min-width: 200px;
+    width: 300px; /* Largura fixa */
+    min-height: 200px; /* Altura mínima */
     background-color: #3c3c3c;
-    padding: 15px;
+    margin: 15px;
+    padding: 20px;
     border-radius: 8px;
-    border: 1px solid #ddd;
-    text-align: center;
-    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Estilo do Título e Subtítulos */
+.product h4 {
+    color: #f1c40f;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.product p {
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+.product button {
+    margin-top: auto;
+    width: 100%;
+}
+
+/* Container para os produtos */
+.swiper-container {
+    padding: 20px;
+    margin: 0 auto;
+}
+
+.swiper-wrapper {
+    display: flex;
+    align-items: stretch;
+}
+
+.swiper-slide {
+    height: auto !important;
+    display: flex;
+    justify-content: center;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .product {
+        width: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product {
+        width: 220px;
+    }
+}
+
+/* Título e Subtítulo */
 h1, h2, h3 {
     color: #f1c40f;
     margin-top: 0;
@@ -65,7 +120,7 @@ button:hover {
     margin-bottom: 20px;
 }
 
-/* Carrinho de compras */
+/* Carrinho */
 .cart {
     background-color: #3c3c3c;
     color: #fff;

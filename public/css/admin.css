@@ -41,7 +41,7 @@ th {
     color: #ffffff; /* Texto branco no cabeçalho */
 }
 
-input[type="text"], input[type="number"], textarea {
+input[type="text"], input[type="number"], textarea, input[type="password"] {
     width: 100%;
     padding: 8px;
     margin: 5px 0;

@@ -1,5 +1,63 @@
 <?php 
 session_start();
+require_once 'config.php';
+
+if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
+    header('Location: login.php');
+    exit();
+}
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+    require 'conexao.php';
+    require_once 'validationhelper.php';
+}
+    $msg = '';
+
+    // Verificação do token CSRF para todas as requisições POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die('CSRF token mismatch');
+    }
+}
+    // Processamento das ações POST (adicionar, editar, excluir)
+    if (isset($_POST['add'])) {
+        $nome = $_POST['nome'] ?? '';
+        $preco = $_POST['preco'] ?? '';
+        $descricao = $_POST['descricao'] ?? '';
+    }
+        $erros = validar_produto($nome, $preco, $descricao);
+        if (empty($erros)) {
+            $stmt = $conn->prepare("INSERT INTO produtos (nome, preco, descricao) VALUES (?, ?, ?)");
+            $stmt->bind_param("sds", $nome, $preco, $descricao);
+            $msg = $stmt->execute() ? "Produto adicionado com sucesso!" : "Erro ao adicionar produto: " . $stmt->error;
+            $stmt->close();
+         else {
+            $msg = implode("<br>", $erros);
+        }
+    } elseif (isset($_POST['edit'])) {
+        // Lógica para editar produto
+        // ...
+    } elseif (isset($_POST['delete'])) {
+        // Lógica para excluir produto
+        // ...
+    }
+
+
+// Paginação
+$_pagina = 10;
+$pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+$inicio = ($pagina - 1) * $por_pagina;
+
+$stmt = $conn->prepare("SELECT * FROM produtos LIMIT ?, ?");
+$stmt->bind_param("ii", $inicio, $por_pagina);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$total_result = $conn->query("SELECT COUNT(*) FROM produtos");
+$total_produtos = $total_result->fetch_row()[0];
+$total_paginas = ceil($total_produtos / $por_pagina);
+}
 
 // Limpar cache
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -65,17 +123,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     }
 }
 
-// Selecionar todos os produtos
-$sql = "SELECT * FROM produtos";
-$result = $conn->query($sql);
-$produtos = [];
-
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $produtos[] = $row;
-    }
+for ($i = 1; $i <= $total_paginas; $i++) {
+    echo "<a href='?pagina=$i'>$i</a> ";
 }
-
 $conn->close();
 ?>
 
@@ -115,10 +165,11 @@ $conn->close();
 
     <?php if (!empty($msg)): ?>
         <p><?php echo htmlspecialchars($msg); ?></p>
-    <?php endif; ?>
 
     <h2>Adicionar Produto</h2>
     <form method="POST">
+
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'];?>">
         <input type="text" name="nome" placeholder="Nome do Produto" required>
         <input type="number" name="preco" placeholder="Preço" step="0.01" required>
         <textarea name="descricao" placeholder="Descrição" required></textarea>
@@ -134,9 +185,10 @@ $conn->close();
             <th>Descrição</th>
             <th>Ações</th>
         </tr>
-        <?php foreach ($produtos as $index => $produto): ?>
         <tr>
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'];?>">
+                
             <td><?php echo htmlspecialchars($produto['id']); ?></td>
             <td>
                 <input type="text" name="nome" class="input-<?php echo $index; ?>" value="<?php echo htmlspecialchars($produto['nome']); ?>" required disabled>
@@ -147,6 +199,7 @@ $conn->close();
             <td>
                 <textarea name="descricao" class="input-<?php echo $index; ?>" required disabled><?php echo htmlspecialchars($produto['descricao']); ?></textarea>
             </td>
+            
             <td>
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($produto['id']); ?>">
                 <button type="button" onclick="habilitarEdicao(<?php echo $index; ?>)">Editar</button>
