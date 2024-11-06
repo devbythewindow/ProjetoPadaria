@@ -124,7 +124,7 @@ function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
             function handleError(error) {
             console.error('Error:', error);
             NotificationManager.error('Ocorreu um erro: ' + error.message);
-            ?>
+            
 }
 
 // E use-a nas suas chamadas fetch

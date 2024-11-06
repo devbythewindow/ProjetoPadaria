@@ -1,63 +1,41 @@
 <?php
-session_start();
-require_once __DIR__ . '/../../config/config.php';
-require_once __DIR__ . '/../../php/conexao.php';
-
 header('Content-Type: application/json');
-
-// Verifica se é uma requisição POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
-    exit;
-}
+require_once __DIR__ . '/../../php/conexao.php'; // Inclua sua conexão com o banco de dados
 
 try {
-    // Recebe os dados do POST
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (!$data) {
-        throw new Exception('Dados inválidos');
-    }
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Dados inválidos');
+        }
 
-    // Verifica campos obrigatórios
-    if (!isset($data['id']) || !isset($data['nome']) || !isset($data['preco'])) {
-        throw new Exception('Campos obrigatórios faltando');
-    }
+        if (!isset($data['id'], $data['nome'], $data['preco'])) {
+            throw new Exception('Campos obrigatórios faltando');
+        }
 
-    // Sanitiza os dados
-    $id = filter_var($data['id'], FILTER_SANITIZE_NUMBER_INT);
-    $nome = filter_var($data['nome'], FILTER_SANITIZE_STRING);
-    $preco = filter_var($data['preco'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        $id = $data['id'];
+        $nome = $data['nome'];
+        $preco = $data['preco'];
 
-    // Prepara e executa a query
-    $stmt = $conn->prepare("UPDATE produtos SET nome = ?, preco = ? WHERE id = ?");
-    $stmt->bind_param("sdi", $nome, $preco, $id);
-    
-    if (!$stmt->execute()) {
-        throw new Exception("Erro ao atualizar produto");
-    }
+        // Lógica para atualizar o produto no banco de dados
+        $query = "UPDATE produtos SET nome = ?, preco = ? WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ssi", $nome, $preco, $id);
 
-    $stmt->close();
-    $conn->close();
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso!']);
+        } else {
+            throw new Exception('Erro ao atualizar produto.');
+        }
 
-    // Retorna sucesso
-    echo json_encode([
-        'success' => true, 
-        'message' => 'Produto atualizado com sucesso'
-    ]);
-
-} catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
-    
-    if (isset($stmt)) {
         $stmt->close();
+    } else {
+        throw new Exception('Método não permitido');
     }
-    if (isset($conn)) {
-        $conn->close();
-    }
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
+
+$conn->close();
+?>

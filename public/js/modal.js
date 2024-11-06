@@ -1,77 +1,137 @@
-function openCheckoutModal() {
-    const modal = document.getElementById('checkout-modal');
-    if (!modal) return;
-    
-    // Gera o QR Code
-    const qrcodeDiv = document.getElementById('qrcode');
-    qrcodeDiv.innerHTML = ''; // Limpa o conteúdo anterior
-    
-    // Calcula o total do carrinho
-    const total = carrinho.reduce((sum, item) => {
-        return sum + (item.preco * (item.quantidade || 1));
-    }, 0);
-    
-    // Gera novo QR Code
-    new QRCode(qrcodeDiv, {
-        text: "https://www.youtube.com/watch?v=H-kxNBp4ja0",
-        width: 128,
-        height: 128
-    });
+// modal.js
 
-    // Gera número do ticket
-    const ticketNumber = `#${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    document.getElementById('ticket-number').textContent = ticketNumber;
-    
-    // Atualiza o resumo do pedido
-    const orderSummary = document.getElementById('order-summary');
-    orderSummary.innerHTML = carrinho.map(item => `
-        <div class="order-item">
-            <span>${item.nome} x${item.quantidade || 1}</span>
-            <span>R$ ${(item.preco * (item.quantidade || 1)).toFixed(2)}</span>
-        </div>
-    `).join('');
-    
-    modal.style.display = 'block';
+// Obtém o modal
+var modal = document.getElementById("addProductModal");
+
+// Obtém o botão que abre o modal
+var btn = document.getElementById("openModalBtn");
+
+// Obtém o elemento <span> que fecha o modal
+var span = document.getElementsByClassName("close")[0];
+
+// Abre o modal
+btn.onclick = function() {
+    modal.style.display = "block";
 }
 
-// Fecha o modal quando clicar no X
-document.querySelector('.close-modal').addEventListener('click', function() {
-    document.getElementById('checkout-modal').style.display = 'none';
-});
+// Fecha o modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
 
-// Fecha o modal quando clicar fora dele
-window.addEventListener('click', function(event) {
-    const modal = document.getElementById('checkout-modal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
+// Fecha o modal ao clicar fora
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
     }
-});
+}
 
-// Sistema de avaliação
-document.querySelectorAll('.rating i').forEach(star => {
-    star.addEventListener('click', function() {
-        const rating = this.dataset.rating;
-        document.querySelectorAll('.rating i').forEach(s => {
-            // Inverte a lógica de comparação
-            if (s.dataset.rating >= rating) {
-                s.classList.remove('far');
-                s.classList.add('fas');
-            } else {
-                s.classList.remove('fas');
-                s.classList.add('far');
-            }
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.admin-section table');
+
+    table.addEventListener('click', function(e) {
+        const target = e.target;
+        const row = target.closest('tr');
+
+        if (target.classList.contains('edit-btn')) {
+            handleEdit(row, target);
+        } else if (target.classList.contains('delete-btn')) {
+            handleDelete(row);
+        } else if (target.classList.contains('view-stock-btn')) {
+            handleViewStock(row);
+        }
     });
-});
-// Envio do feedback
-document.getElementById('submit-feedback').addEventListener('click', function() {
-    const rating = document.querySelectorAll('.rating i.fas').length;
-    const feedback = document.getElementById('feedback-text').value;
-    
-    alert('Obrigado pelo seu feedback!');
-    document.getElementById('checkout-modal').style.display = 'none';
-    // Limpa o carrinho após o feedback
-    carrinho.length = 0;
-    salvarCarrinho();
-    atualizarCarrinho();
+
+    function handleEdit(row, button) {
+        const inputs = row.querySelectorAll('.editable');
+        const isEditing = button.textContent === 'Editar';
+
+        inputs.forEach(input => {
+            input.readOnly = !isEditing;
+            input.style.backgroundColor = isEditing ? '#fffacd' : '';
+        });
+
+        button.textContent = isEditing ? 'Salvar' : 'Editar';
+
+        if (!isEditing) {
+            saveChanges(row);
+        }
+    }
+
+    function handleDelete(row) {
+        if (confirm('Tem certeza que deseja excluir este produto?')) {
+            const productId = row.dataset.id;
+            deleteProduct(productId);
+        }
+    }
+
+    function handleViewStock(row) {
+        const productId = row.dataset.id;
+        alert('Visualizar estoque do produto ' + productId);
+    }
+
+    function saveChanges(row) {
+        const productId = row.dataset.id;
+        const nome = row.querySelector('input[name="nome"]').value;
+        const preco = row.querySelector('input[name="preco"]').value;
+
+        fetch('/ProjetoPadaria/src/controllers/update_product.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: productId, nome: nome, preco: preco })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro na requisição');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const inputs = row.querySelectorAll('.editable');
+                inputs.forEach(input => {
+                    input.readOnly = true;
+                    input.style.backgroundColor = '';
+                });
+
+                const editButton = row.querySelector('.edit-btn');
+                if (editButton) {
+                    editButton.textContent = 'Editar';
+                }
+
+                alert('Produto atualizado com sucesso!');
+            } else {
+                throw new Error(data.message || 'Erro ao atualizar produto');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro ao atualizar produto: ' + error.message);
+        });
+    }
+
+    function deleteProduct(productId) {
+        fetch('/ProjetoPadaria/src/controllers/deleteProduct.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: productId }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                NotificationManager.success('Produto excluído com sucesso!');
+                location.reload();
+            } else {
+                NotificationManager.error('Erro ao excluir produto.');
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            NotificationManager.error('Erro ao excluir produto.');
+        });
+    }
 });

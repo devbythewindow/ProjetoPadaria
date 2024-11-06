@@ -24,74 +24,56 @@ window.onclick = function(event) {
     if (event.target == modal) {
         modal.style.display = "none";
     }
-
-
-// Obtém o modal
-var modal = document.getElementById("addProductModal");
-
-// Obtém o botão que abre o modal
-var btn = document.getElementById("openModalBtn");
-
-// Obtém o elemento <span> que fecha o modal
-var span = document.getElementsByClassName("close")[0];
-
-// Quando o usuário clica no botão, abre o modal 
-btn.onclick = function() {
-    modal.style.display = "block";
 }
 
-// Quando o usuário clica no <span> (x), fecha o modal
-span.onclick = function() {
-    modal.style.display = "none";
-}
-
-// Quando o usuário clica fora do modal, fecha-o
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-
-// Obtém o modal
-var modal = document.getElementById("addProductModal");
-
-// Obtém o botão que abre o modal
-var btn = document.getElementById("openModalBtn");
-
-// Obtém o elemento <span> que fecha o modal
-var span = document.getElementsByClassName("close")[0];
-
-// Quando o usuário clica no botão, abre o modal 
-btn.onclick = function() {
-    modal.style.display = "block";
-}
-
-// Quando o usuário clica no <span> (x), fecha o modal
-span.onclick = function() {
-    modal.style.display = "none";
-}
-
-// Quando o usuário clica fora do modal, fecha-o
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-document.addEventListener('DOMContentLoaded', function() {
-    const table = document.querySelector('.admin-section table');
+table.addEventListener('click', function(e) {
+    const target = e.target;
+    const row = target.closest('tr');
     
-    table.addEventListener('click', function(e) {
-        const target = e.target;
-        const row = target.closest('tr');
-        
-        if (target.classList.contains('edit-btn')) {
-            handleEdit(row, target);
-        } else if (target.classList.contains('delete-btn')) {
-            handleDelete(row);
-        } else if (target.classList.contains('view-stock-btn')) {
-            handleViewStock(row);
-        }
-    });
+    if (!row) return;
+
+    if (target.classList.contains('edit-btn')) {
+        handleEdit(row);
+    } else if (target.classList.contains('delete-btn')) {
+        // Adiciona um listener que só será executado uma vez
+        const deleteHandler = function() {
+            const productId = row.dataset.id;
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                fetch('/ProjetoPadaria/src/controllers/deleteProduct.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: productId })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(`Erro do servidor: ${response.status} ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        NotificationManager.success('Produto excluído com sucesso!');
+                        row.remove();
+                    } else {
+                        NotificationManager.error(data.message || 'Erro ao excluir produto');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    NotificationManager.error(`Erro ao excluir produto: ${error.message}`);
+                });
+            }
+        };
+
+        target.addEventListener('click', deleteHandler, { once: true });
+        target.click(); // Dispara o evento para garantir que a confirmação apareça
+    }
+});
+
     
     function handleEdit(row, button) {
         const inputs = row.querySelectorAll('.editable');
@@ -145,6 +127,7 @@ function saveChanges(row) {
         })
     })
     .then(response => {
+        console.log(response); // Para ver a resposta do servidor
         if (!response.ok) {
             throw new Error('Erro na requisição');
         }
@@ -182,65 +165,6 @@ function saveChanges(row) {
             input.style.backgroundColor = '';
         });
     });
-}
-function deleteProduct(productId) {
-    fetch('src/controllers/deleteProduct.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: productId }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            NotificationManager.success('Produto excluído com sucesso!');
-            location.reload();
-        } else {
-            NotificationManager.error('Erro ao excluir produto.');
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        NotificationManager.error('Erro ao excluir produto.');
-    });
-}
-    
-    function viewStock(productId) {
-        // Aqui você implementaria a lógica para exibir o estoque
-        // Por exemplo, abrir um modal com as informações do estoque
-        alert('Visualizar estoque do produto ' + productId);
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-var modal = document.getElementById("addProductModal");
-var btn = document.getElementById("openModalBtn");
-var span = document.getElementsByClassName("close")[0];
-    // Abre o modal apenas quando o botão é clicado
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    // Fecha o modal quando clicar no X
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // Fecha o modal quando clicar fora dele
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-});
-
-// Adicione esta função no início do arquivo
-function closeModal() {
-    const modal = document.getElementById("addProductModal");
-    if (modal) {
-        modal.style.display = "none";
-    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -295,20 +219,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Gerenciar produtos existentes
-    table.addEventListener('click', function(e) {
-        const target = e.target;
-        const row = target.closest('tr');
-        
-        if (!row) return;
-
-        if (target.classList.contains('edit-btn')) {
-            handleEdit(row);
-        } else if (target.classList.contains('delete-btn')) {
-            handleDelete(row);
-        }
-    });
-
     function handleEdit(row) {
         const inputs = row.querySelectorAll('.editable');
         const editBtn = row.querySelector('.edit-btn');
@@ -335,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function saveChanges(data, row, inputs, editBtn) {
-        fetch('/ ProjetoPadaria/src/controllers/update_product.php', {
+        fetch('/ProjetoPadaria/src/controllers/update_product.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -361,28 +271,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function handleDelete(row) {
-        const productId = row.dataset.id;
+function handleDelete(row) {
+    const productId = row.dataset.id;
+    console.log('Tentando excluir produto ID:', productId);
 
-        if (confirm('Tem certeza que deseja excluir este produto?')) {
-            fetch(`/ProjetoPadaria/src/controllers/deleteProduct.php?id=${productId}`, {
-                method: 'DELETE'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    NotificationManager.success('Produto excluído com sucesso!');
-                    row.remove();
-                } else {
-                    NotificationManager.error(data.message || 'Erro ao excluir produto');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                NotificationManager.error('Erro ao excluir produto');
-            });
-        }
+    if (confirm('Tem certeza que deseja excluir este produto?')) {
+        fetch('/ProjetoPadaria/src/controllers/deleteProduct.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: productId })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Erro do servidor: ${response.status} ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                NotificationManager.success('Produto excluído com sucesso!');
+                row.remove();
+            } else {
+                NotificationManager.error(data.message || 'Erro ao excluir produto');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            NotificationManager.error(`Erro ao excluir produto: ${error.message}`);
+        });
     }
+}
 });
 
     // Gerenciar produtos existentes
@@ -458,30 +380,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function handleDelete(row) {
-        const productId = row.dataset.id;
-        
-        if (confirm('Tem certeza que deseja excluir este produto?')) {
-            fetch('/ProjetoPadaria/src/controllers/deleteProduct.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id: productId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    NotificationManager.success('Produto excluído com sucesso!');
-                    row.remove();
-                } else {
-                    throw new Error(data.message || 'Erro ao excluir produto');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                NotificationManager.error('Erro ao excluir produto');
-            });
-        }
+ function handleDelete(row) {
+    const productId = row.dataset.id;
+    console.log('ID do produto:', productId); // Verifique o ID do produto
+
+    // Confirmação do usuário antes de excluir o produto
+    if (confirm('Tem certeza que deseja excluir este produto?')) {
+        fetch('/ProjetoPadaria/src/controllers/deleteProduct.php', {
+            method: 'POST', // Método da requisição
+            headers: {
+                'Content-Type': 'application/json', // Define o tipo de conteúdo como JSON
+            },
+            body: JSON.stringify({ id: productId }) // Envia o ID do produto no corpo da requisição
+        })
+        .then(response => {
+            console.log('Response:', response); // Verifica a resposta do servidor
+            if (!response.ok) {
+                throw new Error('Network response was not ok'); // Lança um erro se a resposta não for ok
+            }
+            return response.json(); // Tenta converter a resposta para JSON
+        })
+        .then(data => {
+            if (data.success) {
+                NotificationManager.success('Produto excluído com sucesso!'); // Notifica sucesso
+                row.remove(); // Remove a linha da tabela
+            } else {
+                NotificationManager.error(data.message || 'Erro ao excluir produto'); // Notifica erro
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error); // Loga o erro no console
+            NotificationManager.error('Erro ao excluir produto'); // Notifica erro genérico
+        });
     }
-};
+}
