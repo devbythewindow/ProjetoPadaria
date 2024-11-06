@@ -1,6 +1,8 @@
 <?php 
 session_start();
 require_once 'config.php';
+require_once 'conexao.php';
+require_once 'src/helpers/ValidationHelper.php';
 
 if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
     header('Location: login.php');
@@ -8,9 +10,6 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 }
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-
-    require 'conexao.php';
-    require_once 'validationhelper.php';
 }
     $msg = '';
 
@@ -44,7 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
 
-// Paginação
+
+
+    // Paginação
 $_pagina = 10;
 $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $inicio = ($pagina - 1) * $por_pagina;
@@ -57,7 +58,7 @@ $result = $stmt->get_result();
 $total_result = $conn->query("SELECT COUNT(*) FROM produtos");
 $total_produtos = $total_result->fetch_row()[0];
 $total_paginas = ceil($total_produtos / $por_pagina);
-}
+
 
 // Limpar cache
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");

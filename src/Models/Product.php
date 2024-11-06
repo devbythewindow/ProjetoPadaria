@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../src/database/database.php';
 header('Content-Type: application/json');
 
 class Product {
@@ -10,16 +10,20 @@ class Product {
     }
 
     public function getAllProducts() {
-        $stmt = $this->db->prepare("SELECT * FROM products");
+        $stmt = $this->db->prepare("SELECT * FROM produtos");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function addProduct($nome, $preco, $descricao) {
-        $stmt = $this->db->prepare("INSERT INTO products (name, price, descricao ) VALUES (?, ?, ?)");
-        return $stmt->execute([$nome, $preco, $descricao]);
-    }
+public function addProduct($nome, $preco, $descricao) {
+    // Certifique-se de que a tabela e os campos estão corretos
+    $stmt = $this->db->prepare("INSERT INTO produtos (nome, preco, descricao) VALUES (?, ?, ?)");
+    return $stmt->execute([$nome, $preco, $descricao]);
+}
 
     // Métodos similares para updateProduct e deleteProduct
-}$product = new Product();
-echo json_encode($product->getAllProducts);
+}
+
+$produtos = new Product();
+$allProducts = $produtos->getAllProducts();
+echo json_encode($allProducts);

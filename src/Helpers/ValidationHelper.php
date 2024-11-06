@@ -15,4 +15,3 @@ class ValidationHelper {
     }
 
     // Outros métodos de validação conforme necessário
-}
