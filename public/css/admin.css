@@ -1,77 +1,501 @@
 body {
-    background-color: #2c2c2c; /* Fundo cinza escuro */
-    color: #ffffff; /* Texto branco */
+    background-color: #EAEAE7; /* platinum - mesmo da página inicial */
+    color: #074249; /* midnight-green - mesmo da página inicial */
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     min-height: 100vh;
     margin: 0;
+    padding: 20px;
 }
 
 h1, h2 {
+    color: #D86729; /* cocoa-brown - mesmo da página inicial */
     margin: 20px 0;
-    color: #f1c40f; /* Títulos em amarelo */
+    text-align: center;
 }
 
 .container {
-    width: 80%;
-    max-width: 800px; /* Largura máxima */
+    width: 90%;
+    max-width: 1200px;
     margin: 0 auto;
+}
+
+.admin-section {
+    background-color: #EDECE6; /* alabaster - mesmo da página inicial */
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 1200px;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #3c3c3c; /* Fundo da tabela */
+    background-color: #ffffff;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 20px 0;
 }
 
 table, th, td {
-    border: 1px solid #7f8c8d; /* Borda cinza */
+    border: 1px solid #ddd;
 }
 
 th, td {
-    padding: 10px;
+    padding: 12px;
     text-align: left;
 }
 
 th {
-    background-color: #7f8c8d; /* Fundo das células do cabeçalho */
-    color: #ffffff; /* Texto branco no cabeçalho */
+    background-color: #074249; /* midnight-green */
+    color: #EDECE6; /* alabaster */
+    font-weight: 500;
 }
 
-input[type="text"], input[type="number"], textarea, input[type="password"] {
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+input[type="text"], 
+input[type="number"], 
+textarea, 
+input[type="password"],
+select {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     margin: 5px 0;
-    background-color: #7f8c8d; /* Fundo cinza claro */
-    color: #ffffff; /* Texto branco */
-    border: 1px solid #ddd; /* Borda clara */
-    border-radius: 4px; /* Bordas arredondadas */
-    box-sizing: border-box; /* Para garantir que o padding não afete a largura total */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #074249;
+    box-sizing: border-box;
 }
 
 textarea {
-    height: 100px; /* Aumenta a altura da caixa de descrição */
-}
-
-.input-edicao {
-    background-color: #f39c12; /* Fundo laranja */
-    border: 1px solid #e67e22; /* Borda laranja mais escura */
-    color: #ffffff; /* Texto branco */
+    height: 100px;
+    resize: vertical;
 }
 
 button {
-    background-color: #f39c12; /* Botão laranja */
-    color: #ffffff; /* Texto branco */
+    background-color: #D86729; /* cocoa-brown */
+    color: #EDECE6; /* alabaster */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-weight: 500;
+}
+
+button:hover {
+    background-color: #074249; /* midnight-green */
+}
+
+.message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    text-align: center;
+    background-color: #4CAF50;
+    color: white;
+}
+
+.message.error {
+    background-color: #f44336;
+}
+
+.estoque-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.estoque-form input[type="number"] {
+    width: 120px;
+}
+
+/* Status dos pedidos */
+.status-pendente {
+    color: #f39c12;
+}
+
+.status-em-preparo {
+    color: #3498db;
+}
+
+.status-pronto {
+    color: #2ecc71;
+}
+
+.status-entregue {
+    color: #27ae60;
+}
+
+/* Formulários */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .estoque-form {
+        flex-direction: column;
+    }
+
+    .estoque-form input[type="number"] {
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-section {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Header da seção */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Botões de ação */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Ícones */
+.icon-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.icon-button i {
+    font-size: 16px;
+}
+
+/* Cards de resumo */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.summary-card h3 {
+    color: #074249;
+    margin-bottom: 10px;
+}
+
+.summary-card .value {
+    font-size: 24px;
+    color: #D86729;
+    font-weight: bold;
+}
+
+/* Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: #074249;
+    color: #EDECE6;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Estilos para o modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #EDECE6;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Estilos específicos para o textarea de descrição */
+#descricao {
+    width: 100%;
+    height: 100px; /* Altura fixa */
+    resize: none; /* Impede o redimensionamento */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #074249;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #D86729;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: #D86729;
+    color: white;
     padding: 10px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s; /* Transição suave para o hover */
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
 }
 
-button:hover {
-    background-color: #e67e22; /* Laranja mais escuro ao passar o mouse */
+.btn-add {
+    background-color: #D86729;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    height: 35px;
+    min-width: 150px;
 }
+
+.btn-add:hover {
+    background-color: #074249;
+}
+
+.btn-primary:hover {
+    background-color: #074249;
+}
+
+/* Garante que o modal fique sempre visível no centro */
+@media (max-height: 600px) {
+    .modal-content {
+        top: 0;
+        transform: translate(-50%, 0);
+        margin: 20px 0;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+}
+
+/* ... (resto do CSS permanece o mesmo) ... */
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #D86729;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Estilos para o formulário dentro do modal */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #074249;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    background-color: #D86729;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-primary:hover {
+    background-color: #074249;
+}
+
+.editable {
+    border: none;
+    background-color: transparent;
+    font-size: inherit;
+    font-family: inherit;
+    padding: 2px;
+}
+
+.editable:focus {
+    outline: none;
+    background-color: #fffacd;
+}
+
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.notification {
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 15px 25px;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.5s ease;
+    display: flex;
+    align-items: center;
+    min-width: 300px;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification.success {
+    border-left: 4px solid #4CAF50;
+    color: #2b682d;
+}
+
+.notification.error {
+    border-left: 4px solid #f44336;
+    color: #9f1f1f;
+}
+
+.notification.info {
+    border-left: 4px solid #2196F3;
+    color: #0960a5;
+}
+
+.notification i {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+.notification.fade-out {
+    opacity: 0;
+    transform: translateX(100%);
+}
+

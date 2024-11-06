@@ -1,4 +1,6 @@
 <?php
+// C:\xampp\htdocs\ProjetoPadaria\src\helpers\ValidationHelper.php
+
 class ValidationHelper {
     public static function validateProduct($name, $price, $description) {
         $errors = [];
@@ -15,3 +17,4 @@ class ValidationHelper {
     }
 
     // Outros métodos de validação conforme necessário
+}

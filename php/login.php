@@ -1,37 +1,29 @@
 <?php 
 session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-//Cabeçalhos para cache
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-
-// Autenticação usuário
-if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header('Location: admin.php');
-    exit();
-}
-
-// Autenticação administrador
-$admin_username = 'admin';
-$admin_password = 'senha123';
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/conexao.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    if ($username === $admin_username && $password === $admin_password) {
+    $stmt = $conn->prepare("SELECT * FROM admins WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $admin = $result->fetch_assoc();
+
+    if ($admin && password_verify($password, $admin['password'])) {
         $_SESSION['admin_logged_in'] = true;
-        header('Location: admin.php');
+        $_SESSION['admin_id'] = $admin['id'];
+        header('Location: ../src/views/admin.php');
         exit();
     } else {
         $error_message = 'Usuário ou senha inválidos.';
     }
 }
-?>
 
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -39,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - Café dos Alunos</title>
     <link rel="stylesheet" href="../css/admin.css">
-
 </head>
 <body>
     <div class="container">
@@ -58,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <button type="submit">Entrar</button>
         </form>
-
         <div class="button-container">
             <a href="../index.php" style="text-decoration: none;">
                 <button>Voltar para o Início</button>

@@ -61,15 +61,11 @@ function exibirProdutos(produtos) {
     console.log('Exibindo produtos:', produtos);
     
     // Obter referências aos elementos
-    const massasPaesWrapper = document.querySelector('#carousel-massas-paes .swiper-wrapper');
-    const salgadosWrapper = document.querySelector('#carousel-salgados .swiper-wrapper');
-    const docesBolosWrapper = document.querySelector('#carousel-doces-bolos .swiper-wrapper');
-    
-    console.log('Elementos encontrados:', {
-        massasPaesWrapper,
-        salgadosWrapper,
-        docesBolosWrapper
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    const swiperMassas = new Swiper('#carousel-massas-paes', swiperConfig);
+    const swiperSalgados = new Swiper('#carousel-salgados', swiperConfig);
+    const swiperDoces = new Swiper('#carousel-doces-bolos', swiperConfig);
+});
     // Verificar se todos os elementos necessários existem
     if (!massasPaesWrapper || !salgadosWrapper || !docesBolosWrapper) {
         console.error('Elementos do carrossel não encontrados');

@@ -20,3 +20,4 @@ define('CACHE_DURATION', 3600); // 1 hora
 
 // Configurações de internacionalização
 define('DEFAULT_LANGUAGE', 'pt_BR');
+?>

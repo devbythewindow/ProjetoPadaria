@@ -22,30 +22,29 @@ ini_set('display_errors', 1);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="public/css/cart.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="public/css/modal.css">
 
 </head>
 <body>
 <header>
-    <nav>
+    <div class="header-content">
         <div class="logo-container">
-            <img src="src/img/logo.png" alt="logo" class="logo">
-            <h1>Café dos Alunos</h1>
+            <div class="logo">
+                <i class="fas fa-mug-hot"></i>
+                <h1>Café dos Alunos</h1>
+            </div>
         </div>
-        <ul class="nav-links">
-            <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="#produtos"><i class="fas fa-store"></i> Produtos</a></li>
-            <li><a href="#sobre"><i class="fas fa-info-circle"></i> Sobre</a></li>
-            <li><a href="#contato"><i class="fas fa-envelope"></i> Contato</a></li>
-            <li><a href="src/views/login.php"><i class="fas fa-user"></i> Login</a></li>
-            <li>
-        <div class="cart-icon" id="cart-icon">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-count">0</span>
-        </div>
-    </li>
-</ul>
-    </nav>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#produtos">Produtos</a></li>
+                <li><a href="#sobre">Sobre</a></li>
+                <li><a href="#contato">Contato</a></li>
+                <li><a href="php/login.php">Login</a></li>
+            </ul>
+        </nav>
+    </div>
 </header>
 
     <main>
@@ -61,10 +60,46 @@ ini_set('display_errors', 1);
 
             <?php
 function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
-    echo "<h3>$categoria</h3>";
-    echo '<div class="swiper" id="' . $carouselId . '">'; // Adicione o ID aqui
-    echo '<div class="swiper-wrapper">';
-    // ... resto do código existente ...
+    $sql = "SELECT COUNT(*) FROM produtos WHERE categoria = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $categoria);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $count = $result->fetch_row()[0];
+
+    if ($count > 0) {
+        echo "<h3>$categoria</h3>";
+        echo '<div class="swiper" id="'.$carouselId.'">';
+        echo '<div class="swiper-wrapper">';
+        
+        // Buscar e exibir produtos
+        $sql = "SELECT id, nome, preco, descricao FROM produtos WHERE categoria = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $categoria);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            echo '<div class="swiper-slide">';
+            echo '<div class="product-card">';
+            echo '<div class="product-card-header">';
+            echo '<h4>' . htmlspecialchars($row["nome"]) . '</h4>';
+            echo '<p class="price">R$ ' . number_format($row["preco"], 2, ',', '.') . '</p>';
+            echo '</div>';
+            echo '<p class="description">' . htmlspecialchars($row["descricao"]) . '</p>';
+            echo '<button class="add-to-cart" onclick="adicionarAoCarrinho(' . $row["id"] . ')">';
+            echo '<span>Adicionar</span></button>';
+            echo '</div>';
+            echo '</div>';
+        }
+        
+        echo '</div>';
+        // Adicionar elementos de navegação e paginação
+        echo '<div class="swiper-pagination"></div>';
+        echo '<div class="swiper-button-next"></div>';
+        echo '<div class="swiper-button-prev"></div>';
+        echo '</div>';
+    }
 }
             
                 $sql = "SELECT id, nome, preco, descricao FROM produtos WHERE categoria = ?";
@@ -73,24 +108,6 @@ function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
                 $stmt->execute();
                 $result = $stmt->get_result();
             
-                if ($result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                        echo '<div class="swiper-slide">';
-                        echo '<div class="product-card">';
-                        // Novo div para agrupar nome e preço
-                        echo '<div class="product-card-header">';
-                        echo '<h4>' . htmlspecialchars($row["nome"]) . '</h4>';
-                        echo '<p class="price">R$ ' . number_format($row["preco"], 2, ',', '.') . '</p>';
-                        echo '</div>';
-                        echo '<p class="description">' . htmlspecialchars($row["descricao"]) . '</p>';
-                        echo '<button class="add-to-cart" onclick="adicionarAoCarrinho(' . $row["id"] . ')">';
-                        echo '<span>Adicionar</span></button>';
-                        echo '</div>';
-                        echo '</div>';
-                    }
-                } else {
-                    echo '<div class="swiper-slide"><p class="no-products">Nenhum produto encontrado nesta categoria.</p></div>';
-                }
                 
                 echo '</div>';
                 echo '<div class="swiper-pagination"></div>';
@@ -103,64 +120,132 @@ function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
             exibirProdutosPorCategoria("Massas e Pães", $conn, "carousel-massas-paes");
             exibirProdutosPorCategoria("Salgados", $conn, "carousel-salgados");
             exibirProdutosPorCategoria("Doces e Bolos", $conn, "carousel-doces-bolos");
+            // Adicione esta função no seu arquivo adicionar-produto.js
+            function handleError(error) {
+            console.error('Error:', error);
+            NotificationManager.error('Ocorreu um erro: ' + error.message);
+            ?>
+}
+
+// E use-a nas suas chamadas fetch
+.catch(error => handleError(error));
             ?>
         </section>
 
-        <section id="sobre" class="sobre">
-            <h2>Sobre Nós</h2>
-            <p>O Café dos Alunos é um lugar acolhedor onde você pode desfrutar de deliciosos produtos de padaria.</p>
-        </section>
+<footer>
+    <div class="footer-content">
+        <!-- Seção Sobre Nós -->
+        <div class="footer-section about-us">
+            <h3>Sobre Nós</h3>
+            <ul>
+                <li><a href="#">Nossa História</a></li>
+                <li><a href="#">Nossa Equipe</a></li>
+                <li><a href="#">Nossas Lojas</a></li>
+                <li><a href="#">Trabalhe Conosco</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Termos de Uso</a></li>
+            </ul>
+        </div>
 
-        <section id="contato" class="contato">
-            <h2>Contato</h2>
-            <p>Entre em contato conosco: contato@cafedosalunos.com</p>
-        </section>
-    </main>
+        <!-- Seção Contato -->
+        <div class="footer-section contact">
+            <h3>Contato</h3>
+            <ul>
+                <li><i class="fas fa-phone"></i> (11) 1234-5678</li>
+                <li><i class="fas fa-envelope"></i> contato@cafedosalunos.com</li>
+                <li><i class="fas fa-map-marker-alt"></i> Rua dos Estudantes, 123</li>
+                <li><i class="fas fa-clock"></i> Seg-Sex: 7h às 22h</li>
+                <li><i class="fas fa-clock"></i> Sáb-Dom: 8h às 20h</li>
+            </ul>
+        </div>
 
-    <footer>
-        <p>&copy; 2023 Café dos Alunos. Todos os direitos reservados.</p>
-    </footer>
+        <!-- Seção Redes Sociais -->
+        <div class="footer-section social">
+            <h3>Redes Sociais</h3>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>
+
+        <!-- Seção Newsletter -->
+        <div class="footer-section newsletter">
+            <h3>Newsletter</h3>
+            <p>Receba nossas novidades e promoções!</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Seu melhor e-mail">
+                <button type="submit">Inscrever</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Informações Adicionais -->
+    <div class="footer-bottom">
+        <div class="footer-info">
+            <p>CNPJ: 00.000.000/0000-00</p>
+            <p>Café dos Alunos © 2023 - Todos os direitos reservados</p>
+        </div>
+        <div class="payment-methods">
+            <i class="fab fa-cc-visa"></i>
+            <i class="fab fa-cc-mastercard"></i>
+            <i class="fab fa-cc-amex"></i>
+            <i class="fab fa-pix"></i>
+        </div>
+    </div>
+</footer>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const swiperConfig = {
-            slidesPerView: 1,
-            spaceBetween: 15,
-            loop: false,
-            pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
+document.addEventListener('DOMContentLoaded', function() {
+    const swiperConfig = {
+        slidesPerView: 1,
+        spaceBetween: 15,
+        loop: false,
+        watchOverflow: true, // Desativa o Swiper se não houver slides suficientes
+        observer: true, // Atualiza o Swiper quando elementos são modificados
+        observeParents: true,
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+            dynamicBullets: true, // Melhor visual para muitos slides
+        },
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+                spaceBetween: 20,
             },
-            navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
+            768: {
+                slidesPerView: 3,
+                spaceBetween: 25,
             },
-            breakpoints: {
-                640: {
-                    slidesPerView: 2,
-                    spaceBetween: 20,
-                },
-                768: {
-                    slidesPerView: 3,
-                    spaceBetween: 25,
-                },
-                1024: {
-                    slidesPerView: 4,
-                    spaceBetween: 30,
-                },
-                1200: {
-                    slidesPerView: 5,
-                    spaceBetween: 30,
-                }
+            1024: {
+                slidesPerView: 4,
+                spaceBetween: 30,
             },
-        };
+            1200: {
+                slidesPerView: 4, // Reduzido para 4 para melhor consistência
+                spaceBetween: 30,
+            }
+        },
+        // Adicionar lazy loading para melhor performance
+        lazy: {
+            loadPrevNext: true,
+        },
+    };
 
-        // Inicializa cada Swiper separadamente
+    // Inicializar Swipers com um pequeno delay para garantir que o DOM está pronto
+    setTimeout(() => {
         const swipers = document.querySelectorAll('.swiper');
         swipers.forEach(swiperElement => {
             new Swiper(swiperElement, swiperConfig);
         });
-    });
+    }, 100);
+});
     </script>
     <script>
         document.getElementById('cart-icon').addEventListener('click', function() {
@@ -218,7 +303,7 @@ function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
         </div>
     </div>
 </div>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+   
     <!-- No final do body -->
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script src="public/js/product-list.js"></script>
