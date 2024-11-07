@@ -72,10 +72,11 @@ nav {
 
 .nav-links {
     display: flex;
+    align-items: center;
     list-style: none;
     margin: 0;
     padding: 0;
-    gap: 20px;
+    gap: 5px;
 }
 
 .nav-links a {
@@ -101,6 +102,24 @@ nav {
 
 .nav-links a:hover {
     color: #D86729; /* cocoa-brown */
+}
+
+.nav-links li a i {
+    font-size: 1.2em;
+}
+
+.admin-login a {
+    background-color: #074249; /* Cor de fundo para destacar */
+    color: #EDECE6 !important; /* Cor do texto */
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.admin-login a:hover {
+    background-color: #D86729; /* Cor de hover */
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* Seção Hero */
@@ -194,7 +213,7 @@ nav {
     
 }
 .cart-icon {
-    font-size: 24px; /* Aumenta o tamanho do ícone */
+    font-size: 1.7em; /* Aumenta o tamanho do ícone */
     color: #EDECE6;
     cursor: pointer;
     display: flex;
@@ -234,6 +253,8 @@ nav {
 .add-to-cart:hover {
     background-color: #074249; /* midnight-green */
 }
+
+
 
 /* Navegação Swiper */
 .swiper-button-next,
@@ -428,3 +449,4 @@ footer {
         width: calc(100% / 5);
     }
 }
+

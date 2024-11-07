@@ -10,18 +10,18 @@ try {
             throw new Exception('Dados inválidos');
         }
 
-        if (!isset($data['id'], $data['nome'], $data['preco'])) {
-            throw new Exception('Campos obrigatórios faltando');
-        }
+        if (!isset($data['id'], $data['nome'], $data['preco'], $data['categoria'])) {
+    throw new Exception('Campos obrigatórios faltando');
+}
 
-        $id = $data['id'];
-        $nome = $data['nome'];
-        $preco = $data['preco'];
+$id = $data['id'];
+$nome = $data['nome'];
+$preco = $data['preco'];
+$categoria = $data['categoria'];
 
-        // Lógica para atualizar o produto no banco de dados
-        $query = "UPDATE produtos SET nome = ?, preco = ? WHERE id = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("ssi", $nome, $preco, $id);
+$query = "UPDATE produtos SET nome = ?, preco = ?, categoria = ? WHERE id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("sssi", $nome, $preco, $categoria, $id);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso!']);

@@ -29,29 +29,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - Café dos Alunos</title>
-    <link rel="stylesheet" href="../css/admin.css">
+    <title>Login Administrativo - Café dos Alunos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/ProjetoPadaria/public/css/login.css">        
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Login Admin</h2>
-        <?php if (isset($error_message)) : ?>
-            <div class="error"><?php echo $error_message; ?></div>
+    <div class="login-container">
+        <div class="restricted-badge">
+            <i class="fas fa-shield-alt"></i>
+            Área Restrita
+        </div>
+
+        <div class="login-header">
+            <i class="fas fa-user-shield"></i>
+            <h1>Acesso Administrativo</h1>
+            <p>Bem-vindo à área administrativa do Café dos Alunos. Este acesso é exclusivo para administradores autorizados.</p>
+        </div>
+
+        <?php if (isset($error_message)): ?>
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <?php echo htmlspecialchars($error_message); ?>
+            </div>
         <?php endif; ?>
-        <form method="POST" action="login.php">
-            <div>
-                <label for="username">Usuário:</label>
-                <input type="text" name="username" required>
+
+        <form method="POST" action="">
+            <div class="form-group">
+                <label for="username">Usuário</label>
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" name="username" required 
+                       placeholder="Digite seu usuário administrativo">
             </div>
-            <div>
-                <label for="password">Senha:</label>
-                <input type="password" name="password" required>
+
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Digite sua senha">
             </div>
-            <button type="submit">Entrar</button>
+
+            <button type="submit" class="login-button">
+                <i class="fas fa-sign-in-alt"></i>
+                Acessar Painel
+            </button>
         </form>
-        <div class="button-container">
-            <a href="../index.php" style="text-decoration: none;">
-                <button>Voltar para o Início</button>
+
+        <div class="security-info">
+            <i class="fas fa-info-circle"></i>
+            Esta é uma área segura. Todas as tentativas de acesso são monitoradas.
+        </div>
+
+        <div class="back-button">
+            <a href="../index.php">
+                <i class="fas fa-arrow-left"></i>
+                Voltar para a Loja
             </a>
         </div>
     </div>

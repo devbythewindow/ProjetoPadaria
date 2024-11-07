@@ -20,10 +20,10 @@ ini_set('display_errors', 1);
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
     <link rel="stylesheet" href="public/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/cart.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="<?= SITE_URL ?>/public/css/cart.css">    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="public/css/modal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
 </head>
 <body>
@@ -36,14 +36,20 @@ ini_set('display_errors', 1);
             </div>
         </div>
         <nav>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#produtos">Produtos</a></li>
-                <li><a href="#sobre">Sobre</a></li>
-                <li><a href="#contato">Contato</a></li>
-                <li><a href="php/login.php">Login</a></li>
-            </ul>
-        </nav>
+    <ul class="nav-links">
+        <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="#produtos"><i class="fas fa-bread-slice"></i> Produtos</a></li>
+        <li><a href="#sobre"><i class="fas fa-info-circle"></i> Sobre</a></li>
+        <li><a href="#contato"><i class="fas fa-envelope"></i> Contato</a></li>
+        <li class="admin-login"><a href="php/login.php"><i class="fas fa-user-shield"></i> Admin</a></li>
+        <li>
+            <div class="cart-icon" id="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">0</span>
+            </div>
+        </li>
+    </ul>
+</nav>
     </div>
 </header>
 
@@ -87,7 +93,7 @@ function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
             echo '<p class="price">R$ ' . number_format($row["preco"], 2, ',', '.') . '</p>';
             echo '</div>';
             echo '<p class="description">' . htmlspecialchars($row["descricao"]) . '</p>';
-            echo '<button class="add-to-cart" onclick="adicionarAoCarrinho(' . $row["id"] . ')">';
+            echo '<button class="add-to-cart" data-product-id="adicionarAoCarrinho(' . $row["id"] . ')">';
             echo '<span>Adicionar</span></button>';
             echo '</div>';
             echo '</div>';
@@ -101,35 +107,14 @@ function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
         echo '</div>';
     }
 }
-            
-                $sql = "SELECT id, nome, preco, descricao FROM produtos WHERE categoria = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("s", $categoria);
-                $stmt->execute();
-                $result = $stmt->get_result();
-            
-                
-                echo '</div>';
-                echo '<div class="swiper-pagination"></div>';
-                echo '<div class="swiper-button-next"></div>';
-                echo '<div class="swiper-button-prev"></div>';
-                echo '</div>';
-            
 
-            // Chamada das funções para cada categoria
-            exibirProdutosPorCategoria("Massas e Pães", $conn, "carousel-massas-paes");
-            exibirProdutosPorCategoria("Salgados", $conn, "carousel-salgados");
-            exibirProdutosPorCategoria("Doces e Bolos", $conn, "carousel-doces-bolos");
-            // Adicione esta função no seu arquivo adicionar-produto.js
-            function handleError(error) {
-            console.error('Error:', error);
-            NotificationManager.error('Ocorreu um erro: ' + error.message);
-            
-}
-
-// E use-a nas suas chamadas fetch
-.catch(error => handleError(error));
-            ?>
+// Chamada das funções para cada categoria
+exibirProdutosPorCategoria("Massas e Pães", $conn, "carousel-massas-paes");
+exibirProdutosPorCategoria("Salgados", $conn, "carousel-salgados");
+exibirProdutosPorCategoria("Doces e Bolos", $conn, "carousel-doces-bolos");
+exibirProdutosPorCategoria("Sopas e Caldos", $conn, "carousel-sopas-caldos");
+?>
+``
         </section>
 
 <footer>
@@ -151,7 +136,7 @@ function exibirProdutosPorCategoria($categoria, $conn, $carouselId) {
         <div class="footer-section contact">
             <h3>Contato</h3>
             <ul>
-                <li><i class="fas fa-phone"></i> (11) 1234-5678</li>
+                <li><i class="fas fa-phone"></i> (85) 1234-5678</li>
                 <li><i class="fas fa-envelope"></i> contato@cafedosalunos.com</li>
                 <li><i class="fas fa-map-marker-alt"></i> Rua dos Estudantes, 123</li>
                 <li><i class="fas fa-clock"></i> Seg-Sex: 7h às 22h</li>
@@ -310,6 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <script src="public/js/cart.js"></script>
     <script src="public/js/modal.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</body>
 </body>
 </html>
 

@@ -1,6 +1,12 @@
 let produtos = [];
 const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
+const massasPaesWrapper = document.querySelector('#carousel-massas-paes .swiper-wrapper');
+const salgadosWrapper = document.querySelector('#carousel-salgados .swiper-wrapper');
+const docesBolosWrapper = document.querySelector('#carousel-doces-bolos .swiper-wrapper');
+const sopasWrapper = document.querySelector('#carousel-sopas-caldos .swiper-wrapper');
+
+
 function salvarCarrinho() {
     localStorage.setItem('carrinho', JSON.stringify(carrinho));
 }
@@ -14,6 +20,7 @@ function carregarProdutos() {
             }
             return response.json();
         })
+
         .then(data => {
             console.log('Dados recebidos:', data);
             if (!Array.isArray(data)) {
@@ -28,22 +35,40 @@ function carregarProdutos() {
         });
 }
 
-document.getElementById('cart-icon').addEventListener('click', function() {
-    const cartSidebar = document.getElementById('cart-sidebar');
-    if (cartSidebar.classList.contains('open')) {
-        closeCart(); // Fecha o carrinho se ele estiver aberto
-    } else {
-        openCart(); // Abre o carrinho se ele estiver fechado
+// Em product-list.js, modifique a parte do event listener do carrinho:
+
+// cart.js
+document.addEventListener('DOMContentLoaded', () => {
+    const cartIcon = document.getElementById('cart-icon');
+    const closeCartBtn = document.getElementById('close-cart');
+
+    if (cartIcon) {
+        cartIcon.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const cartSidebar = document.getElementById('cart-sidebar');
+            if (cartSidebar.classList.contains('open')) {
+                closeCart();
+            } else {
+                openCart();
+            }
+        });
+    }
+
+    if (closeCartBtn) {
+        closeCartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeCart();
+        });
+    }
+
+    const savedCart = localStorage.getItem('carrinho');
+    if (savedCart) {
+        carrinho.push(...JSON.parse(savedCart));
+        atualizarCarrinho();
     }
 });
-
-function mostrarMensagemErro(mensagem) {
-    console.error(mensagem);
-    const mensagemErro = document.createElement('div');
-    mensagemErro.classList.add('erro');
-    mensagemErro.textContent = mensagem;
-    document.body.appendChild(mensagemErro);
-}
 
 function escapeHTML(str) {
     const div = document.createElement('div');
@@ -51,7 +76,6 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 
-// Função para exibir produtos por categoria
 function exibirProdutos(produtos) {
     if(!produtos || produtos.length === 0) {
         console.log('Nenhum produto para exibir');
@@ -59,15 +83,9 @@ function exibirProdutos(produtos) {
     }
     
     console.log('Exibindo produtos:', produtos);
-    
-    // Obter referências aos elementos
-document.addEventListener('DOMContentLoaded', function () {
-    const swiperMassas = new Swiper('#carousel-massas-paes', swiperConfig);
-    const swiperSalgados = new Swiper('#carousel-salgados', swiperConfig);
-    const swiperDoces = new Swiper('#carousel-doces-bolos', swiperConfig);
-});
+
     // Verificar se todos os elementos necessários existem
-    if (!massasPaesWrapper || !salgadosWrapper || !docesBolosWrapper) {
+    if (!massasPaesWrapper || !salgadosWrapper || !docesBolosWrapper || !sopasWrapper) {
         console.error('Elementos do carrossel não encontrados');
         return;
     }
@@ -76,11 +94,13 @@ document.addEventListener('DOMContentLoaded', function () {
     massasPaesWrapper.innerHTML = '';
     salgadosWrapper.innerHTML = '';
     docesBolosWrapper.innerHTML = '';
+    sopasWrapper.innerHTML = '';
 
     const categorias = {
         "Massas e Pães": massasPaesWrapper,
         "Salgados": salgadosWrapper,
-        "Doces e Bolos": docesBolosWrapper
+        "Doces e Bolos": docesBolosWrapper,
+        "Sopas e Caldos": sopasWrapper
     };
 
     produtos.forEach(produto => {
@@ -88,23 +108,19 @@ document.addEventListener('DOMContentLoaded', function () {
             const slide = document.createElement('div');
             slide.classList.add('swiper-slide');
             
-            const produtoDiv = document.createElement('div');
-            produtoDiv.classList.add('product');
-            
-            produtoDiv.innerHTML = `
+            slide.innerHTML = `
                 <div class="product-card">
                     <div class="product-card-header">
                         <h3>${escapeHTML(produto.nome)}</h3>
                         <p class="price">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
                     </div>
                     <p class="description">${escapeHTML(produto.descricao)}</p>
-                    <button class="add-to-cart" onclick="adicionarAoCarrinho(${produto.id})">
+                    <button class="add-to-cart" data-product-id="${produto.id}">
                         <span>Adicionar</span>
                     </button>
                 </div>
             `;
             
-            slide.appendChild(produtoDiv);
             categorias[produto.categoria].appendChild(slide);
         }
     });
@@ -114,39 +130,38 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 
 function inicializarSwipers() {
-    const swiperConfigs = {
-        slidesPerView: 3,
-        spaceBetween: 30,
+    const swiperConfig = {
+        slidesPerView: 1,
+        spaceBetween: 10,
         pagination: {
             el: '.swiper-pagination',
-            clickable: true
+            clickable: true,
         },
         navigation: {
             nextEl: '.swiper-button-next',
             prevEl: '.swiper-button-prev',
         },
         breakpoints: {
-            320: {
-                slidesPerView: 1,
-                spaceBetween: 10
+            640: {
+                slidesPerView: 2,
+                spaceBetween: 20,
             },
             768: {
-                slidesPerView: 2,
-                spaceBetween: 20
+                slidesPerView: 3,
+                spaceBetween: 30,
             },
             1024: {
-                slidesPerView: 3,
-                spaceBetween: 30
-            }
+                slidesPerView: 4,
+                spaceBetween: 40,
+            },
         }
     };
 
-    new Swiper('#carousel-massas-paes', swiperConfigs);
-    new Swiper('#carousel-salgados', swiperConfigs);
-    new Swiper('#carousel-doces-bolos', swiperConfigs);
+    new Swiper('#carousel-massas-paes', swiperConfig);
+    new Swiper('#carousel-salgados', swiperConfig);
+    new Swiper('#carousel-doces-bolos', swiperConfig);
+    new Swiper('#carousel-sopas-caldos', swiperConfig);
 }
-
-// Função para adicionar produto ao carrinho
 function adicionarAoCarrinho(produtoId) {
     const produto = produtos.find(p => p.id === produtoId);
     if (produto) {
@@ -154,31 +169,15 @@ function adicionarAoCarrinho(produtoId) {
         if (itemExistente) {
             itemExistente.quantidade = (itemExistente.quantidade || 1) + 1;
         } else {
-            produto.quantidade = 1;
-            carrinho.push(produto);
+            carrinho.push({...produto, quantidade: 1});
         }
         salvarCarrinho();
         atualizarCarrinho();
-        
-        const button = document.querySelector(`button[onclick="adicionarAoCarrinho(${produtoId})"]`);
-        button.classList.add('added');
-        setTimeout(() => {
-            button.classList.remove('added');
-        }, 1000);
-
         atualizarContadorCarrinho();
+        NotificationManager.success('Produto adicionado ao carrinho!');
     }
 }
 
-function atualizarContadorCarrinho() {
-    const contador = document.querySelector('.cart-count');
-    if (contador) {
-        const totalItens = carrinho.reduce((sum, item) => sum + (item.quantidade || 1), 0);
-        contador.textContent = totalItens;
-    }
-}
-
-// Função para atualizar o carrinho
 function atualizarCarrinho() {
     const listaCarrinho = document.getElementById('cart-items');
     if (!listaCarrinho) return;
@@ -224,6 +223,33 @@ function atualizarCarrinho() {
     atualizarContadorCarrinho();
 }
 
+function atualizarContadorCarrinho() {
+    const contador = document.querySelector('.cart-count');
+    if (contador) {
+        const totalItens = carrinho.reduce((sum, item) => sum + (item.quantidade || 1), 0);
+        contador.textContent = totalItens;
+    }
+}
+
+function removerDoCarrinho(index) {
+    carrinho.splice(index, 1);
+    salvarCarrinho();
+    atualizarCarrinho();
+}
+
+function alterarQuantidade(index, delta) {
+    if (!carrinho[index]) return;
+    
+    carrinho[index].quantidade = (carrinho[index].quantidade || 1) + delta;
+    
+    if (carrinho[index].quantidade <= 0) {
+        carrinho.splice(index, 1);
+    }
+    
+    salvarCarrinho();
+    atualizarCarrinho();
+}
+
 function atualizarQuantidadeManual(index, novaQuantidade) {
     if (!carrinho[index]) return;
     
@@ -236,45 +262,60 @@ function atualizarQuantidadeManual(index, novaQuantidade) {
     
     salvarCarrinho();
     atualizarCarrinho();
-}function alterarQuantidade(index, delta) {
-    if (!carrinho[index]) return;
-    
-    carrinho[index].quantidade = (carrinho[index].quantidade || 1) + delta;
-    
-    if (carrinho[index].quantidade <= 0) {
-        // Remove o item do carrinho
-        carrinho.splice(index, 1);
-    }
-    
-    salvarCarrinho();
-    atualizarCarrinho();
 }
 
-// Função para remover produto do carrinho
-function removerDoCarrinho(index) {
-    carrinho.splice(index, 1);
-    salvarCarrinho ();
-    atualizarCarrinho();
-}
-
-// Função para finalizar a compra
 function checkout() {
     if (carrinho.length === 0) {
-        alert('Seu carrinho está vazio!');
+        NotificationManager.error('Seu carrinho está vazio!');
         return;
     }
-    openCheckoutModal();
 
-    // Calcular o total corretamente
-    const total = carrinho.reduce((sum, item) => {
-        return sum + (item.preco * (item.quantidade || 1));
-    }, 0);
-    
-    if (confirm(`Total da compra: R$ ${total.toFixed(2)}\nDeseja finalizar a compra?`)) {
-        carrinho.length = 0;
-        salvarCarrinho();
-        atualizarCarrinho();
-        alert('Compra finalizada com sucesso!');
+    const checkoutModal = document.getElementById('checkout-modal');
+    if (checkoutModal) {
+        const orderSummary = document.getElementById('order-summary');
+        if (orderSummary) {
+            let summary = '';
+            let total = 0;
+            carrinho.forEach(item => {
+                const subtotal = item.preco * (item.quantidade || 1);
+                total += subtotal;
+                summary += `
+                    <div class="order-item">
+                        <span>${escapeHTML(item.nome)}</span>
+                        <span>${item.quantidade}x</span>
+                        <span>R$ ${subtotal.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            summary += `
+                <div class="order-total">
+                    <strong>Total:</strong>
+                    <span>R$ ${total.toFixed(2)}</span>
+                </div>
+            `;
+            orderSummary.innerHTML = summary;
+        }
+
+        const ticketNumber = document.getElementById('ticket-number');
+        if (ticketNumber) {
+            ticketNumber.textContent = `#${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        }
+
+        const qrcodeElement = document.getElementById('qrcode');
+        if (qrcodeElement) {
+            qrcodeElement.innerHTML = '';
+            new QRCode(qrcodeElement, {
+                text: JSON.stringify({
+                    total: total,
+                    ticket: ticketNumber.textContent,
+                    timestamp: new Date().getTime()
+                }),
+                width: 256,
+                height: 256
+            });
+        }
+
+        checkoutModal.style.display = 'block';
     }
 }
 
@@ -282,6 +323,47 @@ function checkout() {
 document.addEventListener('DOMContentLoaded', async function() {
     try {
         await carregarProdutos();
+        
+        // Adicionar event listener para os botões "Adicionar ao Carrinho"
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                adicionarAoCarrinho(parseInt(productId));
+            });
+        });
+
+        // Carregar o carrinho do localStorage
+        const savedCart = localStorage.getItem('carrinho');
+        if (savedCart) {
+            carrinho = JSON.parse(savedCart);
+            atualizarCarrinho();
+        }
+
+        // Adicionar event listener para o botão de checkout
+        const checkoutBtn = document.getElementById('checkout-btn');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', checkout);
+        }
+
+    } catch (error) {
+        console.error('Erro ao inicializar:', error);
+        NotificationManager.error('Erro ao inicializar a página. Por favor, recarregue.');
+    }
+});
+
+// Inicialização quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        await carregarProdutos();
+        
+        // Adicionar event listener para os botões "Adicionar ao Carrinho"
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                adicionarAoCarrinho(parseInt(productId));
+            });
+        });
+
     } catch (error) {
         console.error('Erro ao inicializar:', error);
         mostrarMensagemErro('Erro ao inicializar a página. Por favor, recarregue.');

@@ -9,7 +9,6 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
     exit();
 }
 
-// Função de validação
 function validar_produto($nome, $preco, $descricao) {
     $erros = [];
     if (empty($nome)) {
@@ -42,7 +41,11 @@ class AdminManager {
     public function adicionarProduto($nome, $preco, $descricao) {
         $stmt = $this->conn->prepare("INSERT INTO produtos (nome, preco, descricao) VALUES (?, ?, ?)");
         $stmt->bind_param("sds", $nome, $preco, $descricao);
-        return $stmt->execute();
+        if (!$stmt->execute()) {
+            error_log("Erro ao adicionar produto: " . $stmt->error);
+            return false;
+        }
+        return true;
     }
 
     public function listarPedidos() {
@@ -83,7 +86,22 @@ class AdminManager {
         $result = $this->conn->query($sql);
         return $result->fetch_all(MYSQLI_ASSOC);
     }
+
+
 }
+
+function processar_mensagem($erros, $adminManager, $nome, $preco, $descricao) {
+    if (empty($erros)) {
+        if ($adminManager->adicionarProduto($nome, $preco, $descricao)) {
+            return "Produto adicionado com sucesso!";
+        } else {
+            return "Erro ao adicionar produto.";
+        }
+    } else {
+        return implode("<br>", $erros);
+    }
+}
+
 
 // Inicializa o gerenciador
 $adminManager = new AdminManager($conn);
@@ -102,34 +120,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Processamento das ações POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['add'])) {
-        $nome = $_POST['nome'] ?? '';
-        $preco = $_POST['preco'] ?? '';
-        $descricao = $_POST['descricao'] ?? '';
-        
-        $erros = validar_produto($nome, $preco, $descricao);
-        if (empty($erros)) {
-            if ($adminManager->adicionarProduto($nome, $preco, $descricao)) {
-                $msg = "Produto adicionado com sucesso!";
-            } else {
-                $msg = "Erro ao adicionar produto.";
-            }
-        } else {
-            $msg = implode("<br>", $erros);
-        }
-    }
+if (isset($_POST['atualizar_status_pedido'])) {
+    $pedido_id = $_POST['pedido_id'];
+    $novo_status = $_POST['novo_status'];
 
-    if (isset($_POST['atualizar_status_pedido'])) {
-        $pedido_id = $_POST['pedido_id'];
-        $novo_status = $_POST['novo_status'];
+    // Validação do novo_status
+    if (empty($novo_status)) {
+        $msg = "Status do pedido é obrigatório.";
+    } else {
         if ($adminManager->atualizarStatusPedido($pedido_id, $novo_status)) {
             $msg = "Status do pedido atualizado com sucesso!";
         } else {
             $msg = "Erro ao atualizar status do pedido.";
         }
     }
+}
 
     if (isset($_POST['adicionar_promocao'])) {
         $produto_id = $_POST['produto_id'];
@@ -152,8 +157,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = "Erro ao atualizar estoque.";
         }
     }
-}
-
 // Buscar dados para exibição
 $produtos = $adminManager->listarProdutos();
 $pedidos = $adminManager->listarPedidos();
@@ -177,8 +180,6 @@ $avaliacoes = $adminManager->listarAvaliacoes();
         <p class="message"><?php echo htmlspecialchars($msg); ?></p>
     <?php endif; ?>
 
-
-    <!-- Modal -->
  <!-- Modal -->
 <div id="addProductModal" class="modal">
     <div class="modal-content">
@@ -205,6 +206,7 @@ $avaliacoes = $adminManager->listarAvaliacoes();
                     <option value="Massas e Pães">Massas e Pães</option>
                     <option value="Salgados">Salgados</option>
                     <option value="Doces e Bolos">Doces e Bolos</option>
+                    <option value="Sopas e Caldos">Sopas e Caldos</option>
                 </select>
             </div>
             <button type="submit" class="btn-primary">Adicionar Produto</button>
@@ -224,22 +226,31 @@ $avaliacoes = $adminManager->listarAvaliacoes();
                 <th>ID</th>
                 <th>Nome</th>
                 <th>Preço</th>
+                <th>Categoria</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($produtos as $produto): ?>
-            <tr data-id="<?= htmlspecialchars($produto['id']) ?>">
-                <td><?= htmlspecialchars($produto['id']) ?></td>
-                <td><input type="text" class="editable" name="nome" value="<?= htmlspecialchars($produto['nome']) ?>" readonly></td>
-                <td><input type="number" class="editable" name="preco" value="<?= number_format($produto['preco'], 2, '.', '') ?>" readonly></td>
-                <td>
-                    <button class="edit-btn">Editar</button>
-                    <button class="delete-btn">Excluir</button>
-                    <button class="view-stock-btn">Ver Estoque</button>
-                </td>
-            </tr>
-            <?php endforeach; ?>
+<?php foreach ($produtos as $produto): ?>
+<tr data-id="<?= htmlspecialchars($produto['id']) ?>">
+    <td><?= htmlspecialchars($produto['id']) ?></td>
+    <td><input type="text" class="editable" name="nome" value="<?= htmlspecialchars($produto['nome']) ?>" readonly></td>
+    <td><input type="number" class="editable" name="preco" value="<?= number_format($produto['preco'], 2, '.', '') ?>" readonly></td>
+    <td>
+        <select class="editable" name="categoria" disabled>
+            <option value="Massas e Pães" <?= $produto['categoria'] == 'Massas e Pães' ? 'selected' : '' ?>>Massas e Pães</option>
+            <option value="Salgados" <?= $produto['categoria'] == 'Salgados' ? 'selected' : '' ?>>Salgados</option>
+            <option value="Doces e Bolos" <?= $produto['categoria'] == 'Doces e Bolos' ? 'selected' : '' ?>>Doces e Bolos</option>
+            <option value="Sopas e Caldos" <?= $produto['categoria'] == 'Sopas e Caldos' ? 'selected' : '' ?>>Sopas e Caldos</option>
+        </select>
+    </td>
+    <td>
+        <button class="edit-btn">Editar</button>
+        <button class="delete-btn">Excluir</button>
+        <button class="view-stock-btn">Ver Estoque</button>
+    </td>
+</tr>
+<?php endforeach; ?>
         </tbody>
     </table>
 </div>
