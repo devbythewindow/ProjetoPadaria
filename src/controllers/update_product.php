@@ -1,17 +1,21 @@
 <?php
-header('Content-Type: application/json');
-require_once __DIR__ . '/../../php/conexao.php'; // Inclua sua conexão com o banco de dados
+require_once __DIR__ . '/../../php/conexao.php';
 
-try {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('Dados inválidos');
-        }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['id'];
+    $nome = $data['nome'];
+    $preco = $data['preco'];
+    $categoria = $data['categoria'];
 
-        if (!isset($data['id'], $data['nome'], $data['preco'], $data['categoria'])) {
-    throw new Exception('Campos obrigatórios faltando');
+    $stmt = $conn->prepare("UPDATE produtos SET nome = ?, preco = ?, categoria = ? WHERE id = ?");
+    $stmt->bind_param("sdsi", $nome, $preco, $categoria, $id);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso!']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Erro ao atualizar produto.']);
+    }
 }
 
 $id = $data['id'];

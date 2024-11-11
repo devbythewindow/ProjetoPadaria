@@ -1,0 +1,63 @@
+.checkout-modal {
+    display: none; /* Inicialmente escondido */
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #EDECE6; 
+    padding: 20px;
+    width: 90%; 
+    max-width: 600px;
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    cursor: pointer;
+}
+
+.payment-methods {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.payment-option {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #D86729;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.payment-option:hover {
+    background-color: #D86729;
+    color: #EDECE6;
+}
+
+.cart-summary {
+    margin-top: 20px;
+}
+
+.rating {
+    display: flex;
+    gap: 5px;
+}
+
+.rating i {
+    cursor: pointer;
+}

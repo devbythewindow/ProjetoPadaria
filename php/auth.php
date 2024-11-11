@@ -1,7 +1,7 @@
 <?php 
 session_start();
 
-// credenciais admninistrador
+//Admninistrador
 $admin_username = 'admin';
 $admin_password = 'senha123';
 
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 
 if (!$isAdmin) {
-    // não  admin, exibe o formulário de login
+    // não admin, exibe o formulário de login
     ?>
     <!DOCTYPE html>
     <html lang="pt-BR">

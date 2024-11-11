@@ -4,11 +4,13 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../php/conexao.php';
 require_once __DIR__ . '/../helpers/ValidationHelper.php';
 
+// Verifica se o usuário está autenticado
 if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
     header('Location: ../php/login.php');
     exit();
 }
 
+// Função de validação do produto
 function validar_produto($nome, $preco, $descricao) {
     $erros = [];
     if (empty($nome)) {
@@ -31,15 +33,21 @@ class AdminManager {
     }
 
     public function listarProdutos() {
-        $sql = "SELECT p.*, e.quantidade as qtd_estoque 
-                FROM produtos p 
-                LEFT JOIN estoque e ON p.id = e.produto_id";
+        $sql = "SELECT * FROM produtos";
         $result = $this->conn->query($sql);
+        if (!$result) {
+            error_log("Erro ao listar produtos: " . $this->conn->error);
+            return [];
+        }
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     public function adicionarProduto($nome, $preco, $descricao) {
         $stmt = $this->conn->prepare("INSERT INTO produtos (nome, preco, descricao) VALUES (?, ?, ?)");
+        if (!$stmt) {
+            error_log("Erro ao preparar a consulta: " . $this->conn->error);
+            return false;
+        }
         $stmt->bind_param("sds", $nome, $preco, $descricao);
         if (!$stmt->execute()) {
             error_log("Erro ao adicionar produto: " . $stmt->error);
@@ -48,60 +56,46 @@ class AdminManager {
         return true;
     }
 
-    public function listarPedidos() {
-        $sql = "SELECT p.*, COUNT(ip.id) as total_itens 
-                FROM pedidos p 
-                LEFT JOIN itens_pedido ip ON p.id = ip.pedido_id 
-                GROUP BY p.id 
-                ORDER BY p.data_pedido DESC";
-        $result = $this->conn->query($sql);
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
-
-    public function atualizarStatusPedido($pedido_id, $novo_status) {
-        $stmt = $this->conn->prepare("UPDATE pedidos SET status = ? WHERE id = ?");
-        $stmt->bind_param("si", $novo_status, $pedido_id);
+    public function editarProduto($id, $nome, $preco, $descricao) {
+        $stmt = $this->conn->prepare("UPDATE produtos SET nome = ?, preco = ?, descricao = ? WHERE id = ?");
+        if (!$stmt) {
+            error_log("Erro ao preparar a consulta: " . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param("sdsi", $nome, $preco, $descricao, $id);
         return $stmt->execute();
     }
 
-    public function adicionarPromocao($produto_id, $desconto, $data_inicio, $data_fim) {
-        $stmt = $this->conn->prepare("INSERT INTO promocoes (produto_id, desconto, data_inicio, data_fim) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("idss", $produto_id, $desconto, $data_inicio, $data_fim);
+    public function excluirProduto($id) {
+        $stmt = $this->conn->prepare("DELETE FROM produtos WHERE id = ?");
+        if (!$stmt) {
+            error_log("Erro ao preparar a consulta: " . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param("i", $id);
         return $stmt->execute();
     }
-
-    public function atualizarEstoque($produto_id, $quantidade) {
-        $stmt = $this->conn->prepare("INSERT INTO estoque (produto_id, quantidade) 
-                                    VALUES (?, ?) 
-                                    ON DUPLICATE KEY UPDATE quantidade = ?");
-        $stmt->bind_param("iii", $produto_id, $quantidade, $quantidade);
-        return $stmt->execute();
-    }
-
-    public function listarAvaliacoes() {
-        $sql = "SELECT a.*, p.nome as produto_nome 
-                FROM avaliacoes a 
-                JOIN produtos p ON a.produto_id = p.id 
-                ORDER BY a.data_avaliacao DESC";
-        $result = $this->conn->query($sql);
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
-
-
 }
 
-function processar_mensagem($erros, $adminManager, $nome, $preco, $descricao) {
+function processar_mensagem($erros, $adminManager, $nome, $preco, $descricao, $id = null) {
     if (empty($erros)) {
-        if ($adminManager->adicionarProduto($nome, $preco, $descricao)) {
-            return "Produto adicionado com sucesso!";
+        if ($id) {
+            if ($adminManager->editarProduto($id, $nome, $preco, $descricao)) {
+                return "Produto atualizado com sucesso!";
+            } else {
+                return "Erro ao atualizar produto.";
+            }
         } else {
-            return "Erro ao adicionar produto.";
+            if ($adminManager->adicionarProduto($nome, $preco, $descricao)) {
+                return "Produto adicionado com sucesso!";
+            } else {
+                return "Erro ao adicionar produto.";
+            }
         }
     } else {
-        return implode("<br>", $erros);
+        return implode("<br >", $erros);
     }
 }
-
 
 // Inicializa o gerenciador
 $adminManager = new AdminManager($conn);
@@ -113,54 +107,25 @@ if (!isset($_SESSION['csrf_token'])) {
 
 $msg = '';
 
-// Verificação do token CSRF
+// Verificação do token CSRF e recebimento de dados do formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         die('CSRF token mismatch');
     }
-}
 
-if (isset($_POST['atualizar_status_pedido'])) {
-    $pedido_id = $_POST['pedido_id'];
-    $novo_status = $_POST['novo_status'];
+    if (isset($_POST['nome'])) {
+        $nome = trim($_POST['nome']);
+        $preco = $_POST['preco'];
+        $descricao = trim($_POST['descricao']);
+        $id = $_POST['id'] ?? null; // Captura o ID se estiver presente
 
-    // Validação do novo_status
-    if (empty($novo_status)) {
-        $msg = "Status do pedido é obrigatório.";
-    } else {
-        if ($adminManager->atualizarStatusPedido($pedido_id, $novo_status)) {
-            $msg = "Status do pedido atualizado com sucesso!";
-        } else {
-            $msg = "Erro ao atualizar status do pedido.";
-        }
+        $erros = validar_produto($nome, $preco, $descricao);
+        $msg = processar_mensagem($erros, $adminManager, $nome, $preco, $descricao, $id);
     }
 }
 
-    if (isset($_POST['adicionar_promocao'])) {
-        $produto_id = $_POST['produto_id'];
-        $desconto = $_POST['desconto'];
-        $data_inicio = $_POST['data_inicio'];
-        $data_fim = $_POST['data_fim'];
-        if ($adminManager->adicionarPromocao($produto_id, $desconto, $data_inicio, $data_fim)) {
-            $msg = "Promoção adicionada com sucesso!";
-        } else {
-            $msg = "Erro ao adicionar promoção.";
-        }
-    }
-
-    if (isset($_POST['atualizar_estoque'])) {
-        $produto_id = $_POST['produto_id'];
-        $quantidade = $_POST['quantidade'];
-        if ($adminManager->atualizarEstoque($produto_id, $quantidade)) {
-            $msg = "Estoque atualizado com sucesso!";
-        } else {
-            $msg = "Erro ao atualizar estoque.";
-        }
-    }
 // Buscar dados para exibição
 $produtos = $adminManager->listarProdutos();
-$pedidos = $adminManager->listarPedidos();
-$avaliacoes = $adminManager->listarAvaliacoes();
 ?>
 
 <!DOCTYPE html>
@@ -180,13 +145,13 @@ $avaliacoes = $adminManager->listarAvaliacoes();
         <p class="message"><?php echo htmlspecialchars($msg); ?></p>
     <?php endif; ?>
 
- <!-- Modal -->
-<div id="addProductModal" class="modal">
+<div id="addProductModal" class="add-modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Adicionar Novo Produto</h2>
-        <form id="addProductForm" method="POST">
+        <form id="addProductForm" method="POST" action=".../controllers/add_product.php">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+            <input type="hidden" name="id" id="productId" value="">
             <div class="form-group">
                 <label for="nome">Nome do Produto:</label>
                 <input type="text" id="nome" name="nome" required>
@@ -207,6 +172,8 @@ $avaliacoes = $adminManager->listarAvaliacoes();
                     <option value="Salgados">Salgados</option>
                     <option value="Doces e Bolos">Doces e Bolos</option>
                     <option value="Sopas e Caldos">Sopas e Caldos</option>
+                    <option value="Bebidas">Bebidas</option>
+
                 </select>
             </div>
             <button type="submit" class="btn-primary">Adicionar Produto</button>
@@ -238,87 +205,63 @@ $avaliacoes = $adminManager->listarAvaliacoes();
     <td><input type="number" class="editable" name="preco" value="<?= number_format($produto['preco'], 2, '.', '') ?>" readonly></td>
     <td>
         <select class="editable" name="categoria" disabled>
-            <option value="Massas e Pães" <?= $produto['categoria'] == 'Massas e Pães' ? 'selected' : '' ?>>Massas e Pães</option>
+            <option value="Massas e Pães" <?= $produto['categoria'] == 'Massas e Pães' ? 'selected' : '' ?>>Massas e Pães </option>
             <option value="Salgados" <?= $produto['categoria'] == 'Salgados' ? 'selected' : '' ?>>Salgados</option>
             <option value="Doces e Bolos" <?= $produto['categoria'] == 'Doces e Bolos' ? 'selected' : '' ?>>Doces e Bolos</option>
             <option value="Sopas e Caldos" <?= $produto['categoria'] == 'Sopas e Caldos' ? 'selected' : '' ?>>Sopas e Caldos</option>
         </select>
     </td>
-    <td>
-        <button class="edit-btn">Editar</button>
-        <button class="delete-btn">Excluir</button>
-        <button class="view-stock-btn">Ver Estoque</button>
-    </td>
+<td>
+    <button class="edit-btn" onclick="toggleEdit(<?= htmlspecialchars($produto['id']) ?>)">Editar</button>
+    <button class="delete-btn" onclick="excluirProduto(<?= htmlspecialchars($produto['id']) ?>)">Excluir</button>
+</td>
 </tr>
 <?php endforeach; ?>
         </tbody>
     </table>
 </div>
 
-    <!-- Seção de Pedidos -->
-    <div class="admin-section">
-        <h2>Gerenciar Pedidos</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Data</th>
-                    <th>Status</th>
-                    <th>Total</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($pedidos as $pedido): ?>
-                <tr>
-                    <td><?= htmlspecialchars($pedido['id']) ?></td>
-                    <td><?= date('d/m/Y H:i', strtotime($pedido['data_pedido'])) ?></td>
-                    <td class="status-<?= htmlspecialchars($pedido['status']) ?>"><?= htmlspecialchars($pedido['status']) ?></td>
-                    <td>R$ <?= number_format($pedido['total'], 2, ',', '.') ?></td>
-                    <td>
-                        <form method="POST">
-                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                            <input type="hidden" name="pedido_id" value="<?= $pedido['id'] ?>">
-                            <select name="novo_status">
-                                <option value="pendente">Pendente</option>
-                                <option value="em preparo">Em Preparo</option>
-                                <option value="pronto">Pronto</option>
-                                <option value="entregue">Entregue</option>
-                            </select>
-                            <button type="submit" name="atualizar_status_pedido">Atualizar</button>
-                        </form>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Seção de Avaliações -->
-    <div class="admin-section">
-        <h2>Avaliações</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Produto</th>
-                    <th>Avaliação</th>
-                    <th>Data</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($avaliacoes as $avaliacao): ?>
-                <tr>
-                    <td><?= htmlspecialchars($avaliacao['id']) ?></td>
-                    <td><?= htmlspecialchars($avaliacao['produto_nome']) ?></td>
-                    <td><?= htmlspecialchars($avaliacao['avaliacao']) ?></td>
-                    <td><?= date('d/m/Y H:i', strtotime($avaliacao['data_avaliacao'])) ?></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
+    <script src="../../public/js/add-modal.js"></script>
     <script src="../../public/js/adicionar-produto.js" defer></script>
     <script src="../../public/js/notifications.js"></script>
+    <script>
+        function abrirModal(id, nome, preco, descricao) {
+            document.getElementById('productId').value = id;
+            document.getElementById('nome').value = nome;
+            document.getElementById('preco').value = preco;
+            document.getElementById('descricao').value = descricao;
+            document.getElementById('addProductModal').style.display = 'block';
+        }
+
+        async function excluirProduto(id) {
+    if (confirm("Você tem certeza que deseja excluir este produto?")) {
+        try {
+            const response = await fetch(`/ProjetoPadaria/src/controllers/excluir_produto.php`, {
+                method: 'POST', // Usando POST em vez de DELETE
+                headers: {
+                    'Content-Type': 'application/json' // Define o tipo de conteúdo
+                },
+                body: JSON.stringify({ id: id }) // Enviando o ID do produto como JSON
+            });
+
+            if (!response.ok) {
+                // Se a resposta não for OK, lança um erro
+                throw new Error(`Erro ao excluir produto: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json(); // Espera pela resposta JSON
+            if (result.success) {
+                alert("Produto excluído com sucesso!");
+                location.reload(); // Recarrega a página para atualizar a lista de produtos
+            } else {
+                alert(`Erro ao excluir produto: ${result.message}`);
+            }
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("Ocorreu um erro ao tentar excluir o produto. Tente novamente mais tarde.");
+        }
+    }
+}
+    </script>
 </body>
 </html>

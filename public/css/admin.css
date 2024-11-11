@@ -1,6 +1,6 @@
 body {
-    background-color: #EAEAE7; /* platinum - mesmo da página inicial */
-    color: #074249; /* midnight-green - mesmo da página inicial */
+    background-color: #EAEAE7; 
+    color: #074249; 
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
@@ -11,7 +11,7 @@ body {
 }
 
 h1, h2 {
-    color: #D86729; /* cocoa-brown - mesmo da página inicial */
+    color: #D86729; 
     margin: 20px 0;
     text-align: center;
 }
@@ -23,7 +23,7 @@ h1, h2 {
 }
 
 .admin-section {
-    background-color: #EDECE6; /* alabaster - mesmo da página inicial */
+    background-color: #EDECE6;
     border-radius: 8px;
     padding: 20px;
     margin: 20px 0;
@@ -51,8 +51,8 @@ th, td {
 }
 
 th {
-    background-color: #074249; /* midnight-green */
-    color: #EDECE6; /* alabaster */
+    background-color: #074249; 
+    color: #EDECE6; 
     font-weight: 500;
 }
 
@@ -85,8 +85,8 @@ textarea {
 }
 
 button {
-    background-color: #D86729; /* cocoa-brown */
-    color: #EDECE6; /* alabaster */
+    background-color: #D86729; 
+    color: #EDECE6;
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
@@ -96,7 +96,7 @@ button {
 }
 
 button:hover {
-    background-color: #074249; /* midnight-green */
+    background-color: #074249; 
 }
 
 .message {
@@ -122,7 +122,6 @@ button:hover {
     width: 120px;
 }
 
-/* Status dos pedidos */
 .status-pendente {
     color: #f39c12;
 }
@@ -139,14 +138,12 @@ button:hover {
     color: #27ae60;
 }
 
-/* Formulários */
 form {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
     .container {
         width: 95%;
@@ -170,7 +167,6 @@ form {
     }
 }
 
-/* Animações */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -186,7 +182,6 @@ form {
     animation: fadeIn 0.5s ease-out;
 }
 
-/* Header da seção */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -194,13 +189,11 @@ form {
     margin-bottom: 20px;
 }
 
-/* Botões de ação */
 .action-buttons {
     display: flex;
     gap: 10px;
 }
 
-/* Ícones */
 .icon-button {
     display: flex;
     align-items: center;
@@ -211,7 +204,6 @@ form {
     font-size: 16px;
 }
 
-/* Cards de resumo */
 .summary-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -237,7 +229,6 @@ form {
     font-weight: bold;
 }
 
-/* Tooltips */
 .tooltip {
     position: relative;
     display: inline-block;
@@ -264,7 +255,6 @@ form {
     opacity: 1;
 }
 
-/* Estilos para o modal */
 .modal {
     display: none;
     position: fixed;
@@ -292,11 +282,10 @@ form {
     transform: translate(-50%, -50%);
 }
 
-/* Estilos específicos para o textarea de descrição */
 #descricao {
     width: 100%;
-    height: 100px; /* Altura fixa */
-    resize: none; /* Impede o redimensionamento */
+    height: 100px; 
+    resize: none; 
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -373,7 +362,6 @@ form {
     background-color: #074249;
 }
 
-/* Garante que o modal fique sempre visível no centro */
 @media (max-height: 600px) {
     .modal-content {
         top: 0;
@@ -384,7 +372,6 @@ form {
     }
 }
 
-/* ... (resto do CSS permanece o mesmo) ... */
 
 .close {
     color: #aaa;
@@ -400,7 +387,6 @@ form {
     cursor: pointer;
 }
 
-/* Estilos para o formulário dentro do modal */
 .form-group {
     margin-bottom: 15px;
 }
@@ -498,4 +484,3 @@ form {
     opacity: 0;
     transform: translateX(100%);
 }
-

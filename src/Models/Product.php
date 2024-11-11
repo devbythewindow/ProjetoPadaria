@@ -21,7 +21,6 @@ public function addProduct($nome, $preco, $descricao) {
     return $stmt->execute([$nome, $preco, $descricao]);
 }
 
-    // Métodos similares para updateProduct e deleteProduct
 }
 
 $produtos = new Product();

@@ -1,303 +1,77 @@
-// modal.js
+// Atualiza o carrinho
+function atualizarCarrinho() {
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Obtém o modal
-    var modal = document.getElementById("addProductModal");
-    var btn = document.getElementById("openModalBtn");
-    var span = document.getElementsByClassName("close")[0];
-    var form = document.getElementById("addProductForm");
-    const table = document.querySelector('.admin-section table');
+    let cart = JSON.parse(localStorage.getItem('carrinho')) || [];
+    
+    // Limpa os itens atuais
+    cartItemsContainer.innerHTML = ''; 
+    let total = 0;
 
-    // Abrir modal
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    // Fechar modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // Fechar modal ao clicar fora
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    // Manipular envio do formulário
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Impede o comportamento padrão do formulário
-        const formData = new FormData(form);
-
-        fetch('/ProjetoPadaria/src/controllers/add_product.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                NotificationManager.success('Produto adicionado com sucesso!');
-                modal.style.display = "none";
-                form.reset();
-                setTimeout(() => {
-                    location.reload(); // Recarrega a página após adicionar o produto
-                }, 1500);
-            } else {
-                NotificationManager.error(data.message || 'Erro ao adicionar produto');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            NotificationManager.error('Erro ao adicionar produto');
-        });
+    cart.forEach((produto, index) => {
+        const itemElement = document.createElement('div');
+        itemElement.classList.add('cart-item');
+        itemElement.innerHTML = `
+            <div class="cart-item-header">
+                <span class="item-name">${escapeHTML(produto.nome)}</span>
+                <span class="delete-item" data-index="${index}">Remover</span>
+            </div>
+            <div class="cart-item-details">
+                <div class="price-info">
+                    <span class="unit-price">R$ ${parseFloat(produto.preco).toFixed(2)}</span>
+                    <span class="quantity-controls">
+                        <button class="decrease-quantity" data-index="${index}">-</button>
+                        <input type="number" value="${produto.quantidade}" readonly />
+                        <button class="increase-quantity" data-index="${index}">+</button>
+                    </span>
+                </div>
+                <span class="item-total">R$ ${(produto.preco * produto.quantidade).toFixed(2)}</span>
+            </div>
+        `;
+        cartItemsContainer.appendChild(itemElement);
+        total += produto.preco * produto.quantidade;
     });
 
-    // Gerenciar produtos existentes
-    table.addEventListener('click', function(e) {
-        const target = e.target;
-        const row = target.closest('tr');
+    cartTotal.textContent = `R$ ${total.toFixed(2)}`; // Atualiza o total do carrinho
+}
 
-        if (!row) return;
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('decrease-quantity')) {
+        const index = event.target.dataset.index;
+        updateQuantity(index, -1);
+    } else if (event.target.classList.contains('increase-quantity')) {
+        const index = event.target.dataset.index;
+        updateQuantity(index, 1); 
+    }
+});
 
-        if (target.classList.contains('edit-btn')) {
-            handleEdit(row);
-        } else if (target.classList.contains('delete-btn')) {
-            handleDelete(row);
+function updateQuantity(index, change) {
+    let cart = JSON.parse(localStorage.getItem('carrinho')) || [];
+    const item = cart[index];
+    if (item) {
+        item.quantidade += change;
+        if (item.quantidade <= 0) {
+            cart.splice(index, 1); // Remove o item se a quantidade for 0
         }
-    });
+        localStorage.setItem('carrinho', JSON.stringify(cart)); // Atualiza o localStorage
+        atualizarCarrinho(); 
+    }
+}
 
-function handleEdit(row) {
+function toggleEdit(id) {
+    const row = document.querySelector(`tr[data-id="${id}"]`);
     const inputs = row.querySelectorAll('.editable');
-    const editBtn = row.querySelector('.edit-btn');
-    const categorySelect = row.querySelector('select[name="categoria"]');
-    const isEditing = editBtn.textContent === 'Editar';
 
-    if (isEditing) {
-        // Entrar no modo de edição
-        inputs.forEach(input => {
-            if (input.tagName === 'SELECT') {
-                input.disabled = false; // Habilita o select
-                input.style.pointerEvents = 'auto'; // Permite interação
-            } else {
-                input.readOnly = false;
-            }
-            input.style.backgroundColor = '#fff3cd';
-        });
-        editBtn.textContent = 'Salvar';
-    } else {
-        // Salvar alterações
-        const productId = row.dataset.id;
-        const nome = row.querySelector('input[name="nome"]').value;
-        const preco = row.querySelector('input[name="preco"]').value;
-        const categoria = categorySelect.value;
-
-        // Verifique se os campos obrigatórios estão preenchidos
-        if (!nome || !preco || !categoria) {
-            NotificationManager.error('Campos obrigatórios faltando');
-            return;
-        }
-
-        const data = {
-            id: productId,
-            nome: nome,
-            preco: preco,
-            categoria: categoria
-        };
-
-        saveChanges(data, row, inputs, editBtn);
-    }
-}
-
-function saveChanges(data, row, inputs, editBtn) {
-    fetch('/ProjetoPadaria/src/controllers/update_product.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            NotificationManager.success('Produto atualizado com sucesso!');
-            inputs.forEach(input => {
-                if (input.tagName === 'SELECT') {
-                    input.disabled = true; // Desabilita o select
-                    input.style.pointerEvents = 'none'; // Impede interação
-                } else {
-                    input.readOnly = true;
-                }
-                input.style.backgroundColor = '';
-            });
-            editBtn.textContent = 'Editar';
-        } else {
-            NotificationManager.error(result.message || 'Erro ao atualizar produto');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        NotificationManager.error('Erro ao atualizar produto');
-    });
-}
-
-    function handleDelete(row) {
-        const productId = row.dataset.id;
-
-        if (confirm('Tem certeza que deseja excluir este produto?')) {
-            fetch('/ProjetoPadaria/src/controllers/deleteProduct.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id: productId })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(`Erro do servidor: ${response.status} ${text}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    NotificationManager.success('Produto excluído com sucesso!');
-                    row.remove();
-                } else {
-                    NotificationManager.error(data.message || 'Erro ao excluir produto');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                NotificationManager.error(`Erro ao excluir produto: ${error.message}`);
-            });
-        }
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById("addProductModal");
-    const btn = document.getElementById("openModalBtn");
-    const span = document.getElementsByClassName("close")[0];
-    const form = document.getElementById("addProductForm");
-
-    // Abrir modal
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    // Fechar modal
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // Fechar modal ao clicar fora
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    // Manipular envio do formulário
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Impede o comportamento padrão do formulário
-
-        const formData = new FormData(form);
-
-        fetch('/ProjetoPadaria/src/controllers/add_product.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                NotificationManager.success('Produto adicionado com sucesso!');
-                modal.style.display = "none";
-                form.reset();
-                setTimeout(() => {
-                    location.reload(); // Recarrega a página após adicionar o produto
-                }, 1500);
-            } else {
-                NotificationManager.error(data.message || 'Erro ao adicionar produto');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            NotificationManager.error('Erro ao adicionar produto');
-        });
+    inputs.forEach(input => {
+        input.readOnly = !input.readOnly; // Alterna o estado de leitura
     });
 
-
-
-function handleDelete(row) {
-    const productId = row.dataset.id;
-    console.log('Tentando excluir produto ID:', productId);
-
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
-        fetch('/ProjetoPadaria/src/controllers/deleteProduct.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ id: productId })
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Erro do servidor: ${response.status} ${text}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                NotificationManager.success('Produto excluído com sucesso!');
-                row.remove();
-            } else {
-                NotificationManager.error(data.message || 'Erro ao excluir produto');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            NotificationManager.error(`Erro ao excluir produto: ${error.message}`);
-        });
+    const select = row.querySelector('select');
+    if (select) {
+        select.disabled = !select.disabled; // Alterna o estado do select
     }
-}
-});
 
-
- function handleDelete(row) {
-    const productId = row.dataset.id;
-    console.log('ID do produto:', productId); // Verifique o ID do produto
-
-    // Confirmação do usuário antes de excluir o produto
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
-        fetch('/ProjetoPadaria/src/controllers/deleteProduct.php', {
-            method: 'POST', // Método da requisição
-            headers: {
-                'Content-Type': 'application/json', // Define o tipo de conteúdo como JSON
-            },
-            body: JSON.stringify({ id: productId }) // Envia o ID do produto no corpo da requisição
-        })
-        .then(response => {
-            console.log('Response:', response); // Verifica a resposta do servidor
-            if (!response.ok) {
-                throw new Error('Network response was not ok'); // Lança um erro se a resposta não for ok
-            }
-            return response.json(); // Tenta converter a resposta para JSON
-        })
-        .then(data => {
-            if (data.success) {
-                NotificationManager.success('Produto excluído com sucesso!'); // Notifica sucesso
-                row.remove(); // Remove a linha da tabela
-            } else {
-                NotificationManager.error(data.message || 'Erro ao excluir produto'); // Notifica erro
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error); // Loga o erro no console
-            NotificationManager.error('Erro ao excluir produto'); // Notifica erro genérico
-        });
-    }
+    const editButton = row.querySelector('.edit-btn');
+    editButton.textContent = editButton.textContent === 'Editar' ? 'Salvar' : 'Editar'; // Altera o texto do botão
 }

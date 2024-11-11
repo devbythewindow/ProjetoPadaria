@@ -22,6 +22,11 @@ header {
     padding: 10px 0;
     display: flex;
     align-items: center; /* Alinha verticalmente */
+    position: fixed;
+}
+
+main {
+    margin-top: 60px; /* Ajuste conforme a altura do seu cabeçalho */
 }
 
 .header-content {
@@ -434,7 +439,6 @@ footer {
     animation: fadeIn 1s ease-in;
 }
 
-/* Configuração do Swiper para 5 slides */
 .swiper-container {
     width: 100%;
     padding: 20px 0;

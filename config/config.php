@@ -7,11 +7,11 @@ define('DB_NAME', 'projetopadaria');
 define('SITE_URL', 'http://localhost/ProjetoPadaria');
 define('ADMIN_EMAIL', 'admin@example.com');
 
-// Configurações de segurança
+// segurança
 define('CSRF_TOKEN_SECRET', 'your-secret-key');
 define('PASSWORD_PEPPER', 'your-pepper-string');
 
-// Configurações de logging
+// login
 define('LOG_FILE', __DIR__ . '/../logs/app.log');
 
 // Configurações de cache
